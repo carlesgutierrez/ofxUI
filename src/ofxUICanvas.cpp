@@ -250,6 +250,15 @@ void ofxUICanvas::writeSpecificWidgetData(ofxUIWidget *widget, ofxXmlSettings *X
             XML->setValue("LowValue", rslider->getScaledValueLow(), 0);
         }
             break;
+			
+		case OFX_UI_WIDGET_SSLIDER_H:
+		case OFX_UI_WIDGET_SSLIDER_V:
+		{
+			ofxUIScrollSlider *sslider = (ofxUIScrollSlider *) widget; 
+			XML->setValue("HighScrollValue", sslider->getScaledValueHigh(), 0); 
+			XML->setValue("LowScrollValue", sslider->getScaledValueLow(), 0);                 
+		}
+			break;
             
         case OFX_UI_WIDGET_NUMBERDIALER:
         {
@@ -380,6 +389,17 @@ void ofxUICanvas::loadSpecificWidgetData(ofxUIWidget *widget, ofxXmlSettings *XM
         }
             break;
             
+		case OFX_UI_WIDGET_SSLIDER_H:
+		case OFX_UI_WIDGET_SSLIDER_V:
+		{
+			ofxUIScrollSlider *sslider = (ofxUIScrollSlider *) widget; 
+			float valueHigh = XML->getValue("HighScrollValue", sslider->getScaledValueHigh(), 0); 
+			float valueLow = XML->getValue("LowScrollValue", sslider->getScaledValueLow(), 0); 
+			sslider->setValueHigh(valueHigh);
+			sslider->setValueLow(valueLow);
+		}
+			break;
+			
         case OFX_UI_WIDGET_NUMBERDIALER:
         {
             ofxUINumberDialer *numdialer = (ofxUINumberDialer *) widget;
