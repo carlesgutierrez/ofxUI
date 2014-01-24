@@ -38,11 +38,13 @@ class ofxUIScrollSlider : public ofxUIWidgetWithLabel
 public:
     ofxUIScrollSlider(string _name, float _min, float _max, float _valuelow, float _valuehigh, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
     ofxUIScrollSlider(string _name, float _min, float _max, float *_valuelow, float *_valuehigh, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
-    ofxUIScrollSlider(float x, float y, float w, float h, float _min, float _max, float _valuelow, float _valuehigh, string _name, int _size = OFX_UI_FONT_SMALL);
+ /*
+	ofxUIScrollSlider(float x, float y, float w, float h, float _min, float _max, float _valuelow, float _valuehigh, string _name, int _size = OFX_UI_FONT_SMALL);
     ofxUIScrollSlider(float w, float h, float _min, float _max, float _valuelow, float _valuehigh, string _name, int _size = OFX_UI_FONT_SMALL);
     ofxUIScrollSlider(float x, float y, float w, float h, float _min, float _max, float *_valuelow, float *_valuehigh, string _name, int _size = OFX_UI_FONT_SMALL);
     ofxUIScrollSlider(float w, float h, float _min, float _max, float *_valuelow, float *_valuehigh, string _name, int _size = OFX_UI_FONT_SMALL);
-    ~ofxUIScrollSlider();
+ */
+	~ofxUIScrollSlider();
     void init(string _name, float _min, float _max, float *_valuelow, float *_valuehigh, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
     virtual void update();
     virtual void setDrawPadding(bool _draw_padded_rect);
@@ -80,6 +82,7 @@ public:
 	//c
 	float getPercentValueMiddle();
 	float getPosScrollBar();
+	float rangeval;
     
 protected:    
 	float valuelow, valuehigh, increment; 

@@ -53,12 +53,7 @@ ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(ofxUICanvas *sharedReso
 void ofxUIScrollableSliderCanvas::initScrollable()
 {
     kind = OFX_UI_WIDGET_SCROLLABLECANVAS;
-    sRect = new ofxUIRectangle(rect->x, rect->y, rect->getWidth(), rect->getHeight());
-	//c
-	sRectInternal = new ofxUIRectangle(rect->x, rect->y, rect->getWidth(), rect->getHeight());
-	rectInternal = new ofxUIRectangle(rect->x, rect->y, rect->getWidth(), rect->getHeight());
-	paddedRectInternal = new ofxUIRectangle(rect->x, rect->y, rect->getWidth(), rect->getHeight());
-	
+    sRect = new ofxUIRectangle(rect->x, rect->y, rect->getWidth(), rect->getHeight());	
 	
     paddedRect->setParent(sRect);
     isScrolling = false;
@@ -223,8 +218,8 @@ void ofxUIScrollableSliderCanvas::update()
 			//float dyTop = rectInternal->y - sRectInternal->y;
 			//float dyBot = (sRectInternal->y+sRectInternal->getHeight()) - (rectInternal->y+rectInternal->getHeight());
             
-			cout << "dyTop = " << dyTop << endl;
-			cout << "dyBot = " << dyBot << endl;
+			//cout << "dyTop = " << dyTop << endl;
+			//cout << "dyBot = " << dyBot << endl;
 			
 			if(fabs(dyBot) < stickyDistance)
             {
@@ -391,26 +386,6 @@ void ofxUIScrollableSliderCanvas::setPosition(int x, int y)
     sRect->x = x;
     sRect->y = y;
 }
-
-void ofxUIScrollableSliderCanvas::setScrollingDimensions(float _width, float _height, float _widthInternal, float _heightInternal)
-{
-	//Visible Canvas
-	sRect->setWidth(MIN(_width, ofGetWidth() - sRect->getX()));
-    sRect->setHeight(MIN(_height, ofGetHeight() - sRect->getY()));
-    rect->setWidth(_width);
-    rect->setHeight(_height);
-    paddedRect->width = rect->width+padding*2;
-    paddedRect->height = rect->height+padding*2;
-	
-	//Interaction canvas
-    sRectInternal->setWidth(MIN(_widthInternal, ofGetWidth() - sRect->getX()));
-    sRectInternal->setHeight(MIN(_widthInternal, ofGetHeight() - sRect->getY()));
-    rectInternal->setWidth(_widthInternal);
-    rectInternal->setHeight(_heightInternal);
-    paddedRectInternal->width = rect->width+padding*2;
-    paddedRectInternal->height = rect->height+padding*2;
-}
-
 
 void ofxUIScrollableSliderCanvas::setDimensions(float _width, float _height)
 {

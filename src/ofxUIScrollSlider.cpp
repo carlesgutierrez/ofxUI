@@ -44,7 +44,7 @@ ofxUIScrollSlider::ofxUIScrollSlider(string _name, float _min, float _max, float
     useReference = true;
     init(_name, _min, _max, _valuelow, _valuehigh, w, h, x, y, _size);
 }
-
+/*
 ofxUIScrollSlider::ofxUIScrollSlider(float x, float y, float w, float h, float _min, float _max, float _valuelow, float _valuehigh, string _name, int _size) : ofxUIWidgetWithLabel()
 {
     useReference = false;
@@ -72,7 +72,7 @@ ofxUIScrollSlider::ofxUIScrollSlider(float w, float h, float _min, float _max, f
     init(_name, _min, _max, _valuelow, _valuehigh, w, h, 0, 0, _size);
     //        ofLogWarning("ofxUIScrollSlider: DON'T USE THIS CONSTRUCTOR. THIS WILL BE REMOVED ON FUTURE RELEASES.");
 }
-
+*/
 ofxUIScrollSlider::~ofxUIScrollSlider()
 {
     if(!useReference)
@@ -201,11 +201,13 @@ void ofxUIScrollSlider::drawFill()
 
 void ofxUIScrollSlider::drawFillHighlight()
 {
+	cout << "drawFillHighlight()" << endl;
+	
     if(draw_fill_highlight)
     {
         ofxUIFill();
         ofxUISetColor(color_fill_highlight);
-        if(kind == OFX_UI_WIDGET_RSLIDER_H)
+        if(kind == OFX_UI_WIDGET_SSLIDER_H)
         {
             ofxUIDrawRect(rect->getX()+rect->getWidth()*valuelow, rect->getY(), rect->getWidth()*(valuehigh-valuelow), rect->getHeight());
         }
@@ -222,8 +224,8 @@ void ofxUIScrollSlider::drawFillHighlight()
 		 else */
 		if(kind == OFX_UI_WIDGET_SSLIDER_V)
 		{
-			if(ofGetLogLevel()== OF_LOG_VERBOSE) label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuehigh, ofxUIToString(getScaledValueHigh(),labelPrecision)); 
-			if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuelow, ofxUIToString(getScaledValueLow(),labelPrecision)); 
+			if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuehigh, ofxUIToString(valuehigh,labelPrecision)); 
+			if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuelow, ofxUIToString(valuelow,labelPrecision)); 
 			
 			float middleval = getPercentValueMiddle();
 			float mapmiddleval = getPosScrollBar();
@@ -248,6 +250,13 @@ void ofxUIScrollSlider::mouseMoved(int x, int y )
 
 void ofxUIScrollSlider::mouseDragged(int x, int y, int button)
 {
+	/*
+	if(rect->inside(x, y))
+    {
+        hit = true;
+	}else hit = false;
+	*/
+	
     if(hit)
     {
         state = OFX_UI_STATE_DOWN;
@@ -362,9 +371,8 @@ void ofxUIScrollSlider::input(float x, float y)
     float v = 0;
 	
 	//c
-	float rangeval = valuehigh - valuelow;
-    
-    if(kind == OFX_UI_WIDGET_RSLIDER_H)
+
+    if(kind == OFX_UI_WIDGET_SSLIDER_H)
     {
         v = rect->percentInside(x, y).x;
     }
@@ -373,10 +381,43 @@ void ofxUIScrollSlider::input(float x, float y)
         v = 1.0-rect->percentInside(x, y).y;
     }
 	
-	//Update always as hit
-	valuehigh +=(v-hitPoint); 
-	valuelow +=(v-hitPoint);
-	hitPoint = v; 
+	//some calcs
+
+	
+	float rangeval = valuehigh - valuelow;
+	float halfrange = rangeval*0.5;
+	valuehigh = (v+halfrange); 
+	valuelow = (v-halfrange);
+	
+	
+	cout << "prevaluehigh=" << valuehigh << endl;
+	cout << "prevaluelow=" << valuelow << endl;
+	cout << "halfrange=" << halfrange << endl;
+	cout << "valuehigh=" << valuehigh << endl;
+	cout << "valuelow=" << valuelow << endl;
+	 
+	// inside limits
+	if((valuehigh < 1) && (valuelow > 0)){ 
+		hitPoint = v; 
+		cout << "inside limits" << endl;
+	}
+	//hitBottom
+	else if(valuehigh >= 1){
+		valuehigh = 1; 
+		valuelow= 1 - rangeval;
+		hitPoint = 1 - halfrange; 
+		cout << "hitBottom limit" << endl;
+	}
+	//hitTop
+	else if(valuelow <= 0){
+		valuehigh = rangeval; 
+		valuelow = 0;
+		hitPoint = halfrange; 
+		cout << "hitTop limit" << endl;
+	}
+	else {
+		cout << "Error: Out of Limits" << endl;
+	}
 	
     /*
     if(hitHigh)
@@ -446,19 +487,19 @@ void ofxUIScrollSlider::input(float x, float y)
         valuelow = 1.0;
     }*/
 	
-	//Fix low and high values
-	
-	if(valuehigh > 1.0)
+	//c //Fix low and high values
+	/*
+	if(valuehigh >= 1.0)
 	{
 		valuehigh = 1.0; 
 		valuelow = valuehigh - rangeval;
 	}
 	
-	if(valuelow < 0.0)
+	if(valuelow <= 0.0)
 	{
 		valuelow = 0.0; 
 		valuehigh = valuelow + rangeval;
-	}
+	}*/
     
     updateValueRef();
     updateLabel();

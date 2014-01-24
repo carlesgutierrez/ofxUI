@@ -93,9 +93,6 @@ protected:
     float stickyDistance;    
 	
 	//c
-	ofxUIRectangle *sRectInternal;
-	ofxUIRectangle *rectInternal;
-	ofxUIRectangle *paddedRectInternal; 	
 	float posScrollbar;//Direct scrolling
 	int heightContends;
 };
