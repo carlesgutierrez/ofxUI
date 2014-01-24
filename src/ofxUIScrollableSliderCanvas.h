@@ -64,10 +64,9 @@ public:
     void setMappedScrollPos(float _posScroll);
 	ofVec2f calcHeightContends(vector<ofxUIWidget*> _auxwidgets);
 	void updateScrollPosition();
-	int getHeightContends();
-	//c
+	void updateScrollBarSize(vector<ofxUIWidget*> _auxwidgets, float maxrange, float minrange);
 	void setupScrollBar(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size);
-	
+
 
 #ifdef OFX_UI_TARGET_TOUCH
     void touchDown(float x, float y, int id);
@@ -84,6 +83,7 @@ public:
 	//c
 	void setGUI_SrollSlider(string name, float _min, float _max, int lowvalue, int highvalue, int w, int h, int x, int y, int _size);
 	void guiEvent(ofxUIEventArgs &e);
+	ofxUICanvas* getScroll(); // TODO try to find a better name
 
 protected:
     ofxUIRectangle *sRect;	

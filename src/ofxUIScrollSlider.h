@@ -24,7 +24,7 @@
 
 /*
  *  ofxUIScrollSlider.h
- *  Scroll bar added by Carles on 20/01/14.
+ *  Scroll bar added by Carles Gutierrez on 2014.
  *
  */
 

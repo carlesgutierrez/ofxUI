@@ -216,13 +216,13 @@ void ofxUIScrollSlider::drawFillHighlight()
         }
 		if(kind == OFX_UI_WIDGET_SSLIDER_V)
 		{
-			if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuehigh, ofxUIToString(valuehigh,labelPrecision)); 
-			if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuelow, ofxUIToString(valuelow,labelPrecision)); 
+			//if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuehigh, ofxUIToString(valuehigh,labelPrecision)); 
+			//if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuelow, ofxUIToString(valuelow,labelPrecision)); 
 			
 			float middleval = getPercentValueMiddle();
 			float mapmiddleval = getPosScrollBar();
 			
-			if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, middleval, ofxUIToString(mapmiddleval,labelPrecision)); 
+			//if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, middleval, ofxUIToString(mapmiddleval,labelPrecision)); 
 		}
     }
 }
@@ -585,10 +585,6 @@ float ofxUIScrollSlider::getPercentValueMiddle()
 }
 
 float ofxUIScrollSlider::getPosScrollBar()
-{		
-	//float mapmiddleval = ofxUIMap(getPercentValueMiddle(), min, max, 0.0, 1.0, true); //old
-	
-	cout << "hitPoint = " << hitPoint << endl;
-	
+{			
 	return hitPoint; 
 }
