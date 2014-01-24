@@ -201,7 +201,6 @@ void ofxUIScrollSlider::drawFill()
 
 void ofxUIScrollSlider::drawFillHighlight()
 {
-	cout << "drawFillHighlight()" << endl;
 	
     if(draw_fill_highlight)
     {
@@ -215,13 +214,6 @@ void ofxUIScrollSlider::drawFillHighlight()
         {
             ofxUIDrawRect(rect->getX(), rect->getY()+(1.0-valuehigh)*rect->getHeight(), rect->getWidth(), rect->getHeight()*(valuehigh-valuelow));
         }
-		/*
-		 if(kind == OFX_UI_WIDGET_RSLIDER_V)
-		 {
-		 label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuehigh, ofxUIToString(getScaledValueHigh(),labelPrecision)); 
-		 label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuelow, ofxUIToString(getScaledValueLow(),labelPrecision)); 
-		 }
-		 else */
 		if(kind == OFX_UI_WIDGET_SSLIDER_V)
 		{
 			if(ofGetLogLevel()== OF_LOG_VERBOSE)label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuehigh, ofxUIToString(valuehigh,labelPrecision)); 
@@ -381,126 +373,42 @@ void ofxUIScrollSlider::input(float x, float y)
         v = 1.0-rect->percentInside(x, y).y;
     }
 	
-	//some calcs
-
-	
+	//some calcs	
 	float rangeval = valuehigh - valuelow;
 	float halfrange = rangeval*0.5;
 	valuehigh = (v+halfrange); 
 	valuelow = (v-halfrange);
 	
-	
-	cout << "prevaluehigh=" << valuehigh << endl;
-	cout << "prevaluelow=" << valuelow << endl;
-	cout << "halfrange=" << halfrange << endl;
-	cout << "valuehigh=" << valuehigh << endl;
-	cout << "valuelow=" << valuelow << endl;
-	 
+	//Set limits and values
 	// inside limits
 	if((valuehigh < 1) && (valuelow > 0)){ 
 		hitPoint = v; 
-		cout << "inside limits" << endl;
 	}
 	//hitBottom
 	else if(valuehigh >= 1){
 		valuehigh = 1; 
 		valuelow= 1 - rangeval;
 		hitPoint = 1 - halfrange; 
-		cout << "hitBottom limit" << endl;
 	}
 	//hitTop
 	else if(valuelow <= 0){
 		valuehigh = rangeval; 
 		valuelow = 0;
 		hitPoint = halfrange; 
-		cout << "hitTop limit" << endl;
 	}
 	else {
-		cout << "Error: Out of Limits" << endl;
+		if(ofGetLogLevel()== OF_LOG_VERBOSE)cout << "Error: ofxUISCrollSlider::input: Out of Limits" << endl;
 	}
 	
-    /*
-    if(hitHigh)
-    {
-        valuehigh = v;
-    }
-    else if(hitLow)
-    {
-        valuelow = v;
-    }
-    else if(hitCenter)
-    {
-        valuehigh +=(v-hitPoint);
-        valuelow +=(v-hitPoint);
-        hitPoint = v;
-    }
-    else
-    {
-        float dvh = fabs(valuehigh - v);
-        float dvl = fabs(valuelow - v);
-        if(dvh < .05 || v > valuehigh)
-        {
-            valuehigh = v;
-            hitHigh = true;
-        }
-        else if(dvl < .05 || v < valuelow)
-        {
-            valuelow = v;
-            hitLow = true;
-        }
-        else
-        {
-            hitCenter = true;
-            hitPoint = v;
-        }
-    }
-	 
-    
-    if(valuehigh < valuelow && hitHigh)
-    {
-        valuehigh = hitValueLow;
-        hitHigh = false;
-        hitLow = true;
-    }
-    else if(valuelow > valuehigh && hitLow)
-    {
-        valuelow = hitValueHigh;
-        hitHigh = true;
-        hitLow = false;
-    }
-    
-    if(valuehigh > 1.0)
-    {
-        valuehigh = 1.0;
-    }
-    else if(valuehigh < 0.0)
-    {
-        valuehigh = 0.0;
-    }
-    
-    if(valuelow < 0.0)
-    {
-        valuelow = 0.0;
-    }
-    else if(valuelow > 1.0)
-    {
-        valuelow = 1.0;
-    }*/
-	
-	//c //Fix low and high values
-	/*
-	if(valuehigh >= 1.0)
-	{
-		valuehigh = 1.0; 
-		valuelow = valuehigh - rangeval;
+	//Set right hitPoint depending range size
+	if(v > 0.5){
+		hitPoint = ofxUIMap(valuehigh, 0.5, 1, 0.5, 0, true); // invert v values
+
+	}
+	else if(v < 0.5){
+		hitPoint = ofxUIMap(valuelow, 0.5, 0, 0.5, 1, true); // invert v values
 	}
 	
-	if(valuelow <= 0.0)
-	{
-		valuelow = 0.0; 
-		valuehigh = valuelow + rangeval;
-	}*/
-    
     updateValueRef();
     updateLabel();
 }
@@ -678,8 +586,9 @@ float ofxUIScrollSlider::getPercentValueMiddle()
 
 float ofxUIScrollSlider::getPosScrollBar()
 {		
-	float mapmiddleval = ofxUIMap(getPercentValueMiddle(), min, max, 0.0, 1.0, true);
-	//cout << "mapmiddleval = " << mapmiddleval << endl;
+	//float mapmiddleval = ofxUIMap(getPercentValueMiddle(), min, max, 0.0, 1.0, true); //old
 	
-	return mapmiddleval; 
+	cout << "hitPoint = " << hitPoint << endl;
+	
+	return hitPoint; 
 }

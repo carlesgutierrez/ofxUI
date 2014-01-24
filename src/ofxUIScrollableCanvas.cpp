@@ -580,3 +580,7 @@ bool ofxUIScrollableCanvas::isHit(int x, int y)
     }
     return false;
 }
+
+/*ofxUIRectangle *ofxUIScrollableCanvas::requestForContendsHeigh()
+getHeightContends()
+*/

@@ -77,6 +77,16 @@ void ofxUIScrollableSliderCanvas::initScrollable()
 #ifdef OFX_UI_TARGET_TOUCH
     touchId = -1;
 #endif
+	
+	
+}
+
+void ofxUIScrollableSliderCanvas::setupScrollBar(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size){
+
+	//Scroll bar // name, _min, _max, lowvalue, highvalue, w,						h,		x,		y,	OFX_UI_FONT_SMALL
+	//	name,	0,	400,	380,	400,		25(minimum suported),	390,	CanvasW, 0, OFX_UI_FONT_SMALL
+	//setGUI_SrollSlider(scrollBarname, 0, CanvasH, CanvasH-20, CanvasH, 25, CanvasH, xInit+CanvasW, 0, OFX_UI_FONT_SMALL);
+	setGUI_SrollSlider( _name, _min, _max, _lowvalue, _highvalue, _w, _h, _x, _y, _size);
 }
 
 void ofxUIScrollableSliderCanvas::setDamping(float _damping)
@@ -377,6 +387,9 @@ void ofxUIScrollableSliderCanvas::draw()
     }
     
     ofxUIPopStyle();
+	
+	//c
+	gui_slider->draw();
 }
 
 void ofxUIScrollableSliderCanvas::setPosition(int x, int y)
@@ -672,4 +685,37 @@ void ofxUIScrollableSliderCanvas::updateScrollPosition(){
 
 int ofxUIScrollableSliderCanvas::getHeightContends(){
 	return heightContends;
+}
+
+//c
+//--------------------------------------------------------------
+void ofxUIScrollableSliderCanvas::setGUI_SrollSlider(string name, float _min, float _max, int lowvalue, int highvalue, int w, int h, int x, int y, int _size){	
+	// Canvas for Slider
+	//gui_slider = new ofxUICanvas(x+2, y, w, h);
+	gui_slider = new ofxUICanvas(x+2, y, w, h);
+	
+	//ofxUIScrollSlider::ofxUIScrollSlider(string _name, float _min, float _max, float _valuelow, float _valuehigh, float w, float h,
+	//float x, float y, int _size) : ofxUIWidgetWithLabel()
+	
+	//gui_slider->addWidgetLeft(new ofxUIScrollSlider(name, _min, _max, lowvalue, highvalue, w, h, x, y, OFX_UI_FONT_SMALL));
+	gui_slider->addWidgetLeft(new ofxUIScrollSlider(name, 0, 400, 380, 400, 20, 390, 0, 0, OFX_UI_FONT_SMALL));
+	gui_slider->setDrawPaddingOutline(false);  // draw border
+	
+	ofAddListener(gui_slider->newGUIEvent,this,&ofxUIScrollableSliderCanvas::guiEvent);
+}
+
+//--------------------------------------------------------------
+void ofxUIScrollableSliderCanvas::guiEvent(ofxUIEventArgs &e)
+{
+	string name = e.widget->getName();
+	int kind = e.widget->getKind();
+	
+	//cout << "got event from: " << name << endl;
+	
+	if(name == "S"){
+		ofxUIScrollSlider* scrollSlider =  (ofxUIScrollSlider *)e.widget;
+		float mapvalscroll = scrollSlider->getPosScrollBar();
+		setMappedScrollPos(mapvalscroll);
+		updateScrollPosition();		
+	}
 }

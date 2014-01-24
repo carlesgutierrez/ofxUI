@@ -35,7 +35,7 @@ public:
     ofxUIScrollableSliderCanvas();
     ofxUIScrollableSliderCanvas(ofxUICanvas *sharedResources);
     void initScrollable();
-    void setDamping(float _damping);
+	void setDamping(float _damping);
     void setSnapping(bool _snapping);
     void setScrollArea(float x, float y, float w, float h);
     void setScrollAreaToScreen();
@@ -65,6 +65,9 @@ public:
 	ofVec2f calcHeightContends(vector<ofxUIWidget*> _auxwidgets);
 	void updateScrollPosition();
 	int getHeightContends();
+	//c
+	void setupScrollBar(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size);
+	
 
 #ifdef OFX_UI_TARGET_TOUCH
     void touchDown(float x, float y, int id);
@@ -77,6 +80,10 @@ public:
     void mouseReleased(int x, int y, int button);
     ofxUIRectangle *getSRect();
     virtual bool isHit(int x, int y);
+	
+	//c
+	void setGUI_SrollSlider(string name, float _min, float _max, int lowvalue, int highvalue, int w, int h, int x, int y, int _size);
+	void guiEvent(ofxUIEventArgs &e);
 
 protected:
     ofxUIRectangle *sRect;	
@@ -95,4 +102,6 @@ protected:
 	//c
 	float posScrollbar;//Direct scrolling
 	int heightContends;
+	
+	ofxUICanvas *gui_slider;
 };
