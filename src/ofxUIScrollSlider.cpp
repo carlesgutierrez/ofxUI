@@ -307,6 +307,7 @@ void ofxUIScrollSlider::mouseReleased(int x, int y, int button)
 
 void ofxUIScrollSlider::keyPressed(int key)
 {
+	/*
     if(state == OFX_UI_STATE_OVER)
     {
         switch (key)
@@ -341,6 +342,7 @@ void ofxUIScrollSlider::keyPressed(int key)
                 break;
         }
     }
+	 */
 }
 
 void ofxUIScrollSlider::keyReleased(int key)
@@ -402,11 +404,10 @@ void ofxUIScrollSlider::input(float x, float y)
 	
 	//Set right hitPoint depending range size
 	if(v > 0.5){
-		hitPoint = ofxUIMap(valuehigh, 0.5, 1, 0.5, 0, true); // invert v values
-
+		hitPoint = ofxUIMap(valuehigh, 0.5, 1, 0.5, 0, true); // invert v values // to 0
 	}
 	else if(v < 0.5){
-		hitPoint = ofxUIMap(valuelow, 0.5, 0, 0.5, 1, true); // invert v values
+		hitPoint = ofxUIMap(valuelow, 0.5, 0, 0.5, 1, true); // invert v values // to 1
 	}
 	
     updateValueRef();
@@ -543,6 +544,8 @@ void ofxUIScrollSlider::setParent(ofxUIWidget *_parent)
     }
 }
 
+
+
 void ofxUIScrollSlider::setMax(float _max)
 {
     setMaxAndMin(_max, min);
@@ -572,14 +575,22 @@ bool ofxUIScrollSlider::isDraggable()
     return true;
 }  
 
-//Modifs Scroll Bar
+//c
+float ofxUIScrollSlider::getMax()
+{
+    return max;
+}
+
+float ofxUIScrollSlider::getMin()
+{
+    return min;
+}
+
 float ofxUIScrollSlider::getPercentValueMiddle()
 {		
 	float lowval = label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuelow;
 	float highval = label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuehigh;
 	float middleval = highval - (highval - lowval)*0.5;
-	
-	//cout << "middleval = " << middleval << endl;
 	
 	return middleval; 
 }

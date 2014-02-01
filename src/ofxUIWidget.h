@@ -26,12 +26,20 @@
 
 #include "ofxUIWrapper.h"
 
+#ifndef OFX_UI_NO_XML
+    #include "ofxXmlSettings.h"
+#endif 
+
 class ofxUIWidget           
 {
 public:
     ofxUIWidget();
     virtual ~ofxUIWidget();
     
+    virtual void initRect(float x = 0, float y = 0, float w = 0, float h = 0);
+    virtual void initPaddingRect();
+    virtual void calculatePaddingRect();
+        
     virtual void update();
     virtual void draw();
     
@@ -91,6 +99,11 @@ public:
     virtual void addWidget(ofxUIWidget *widget);
     virtual void removeWidget(ofxUIWidget *widget);
     
+    virtual void addEmbeddedWidget(ofxUIWidget *widget);
+    virtual void clearEmbeddedWidgets();
+    virtual int getEmbeddedWidgetsSize();
+    ofxUIWidget *getEmbeddedWidget(int index);
+    
     virtual void setState(int _state);
     virtual void setFont(ofxUIFont *_font);
 
@@ -146,11 +159,16 @@ public:
     virtual void addModalWidget(ofxUIWidget *widget);
     virtual void removeModalWidget(ofxUIWidget *widget);
 
-    virtual void addEmbeddedWidget(ofxUIWidget *widget);
-    virtual void clearEmbeddedWidgets();
-    virtual int getEmbeddedWidgetsSize();
-    ofxUIWidget *getEmbeddedWidget(int index);
     ofxUIWidget *getCanvasParent();
+    
+    virtual bool hasState();
+    
+#ifndef OFX_UI_NO_XML   
+    
+    virtual void saveState(ofxXmlSettings *XML);
+    virtual void loadState(ofxXmlSettings *XML);
+    
+#endif
     
 protected:
 	ofxUIWidget *parent;

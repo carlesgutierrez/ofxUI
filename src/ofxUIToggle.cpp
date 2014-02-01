@@ -42,34 +42,6 @@ ofxUIToggle::ofxUIToggle(string _name, bool *_value, float w, float h, float x, 
     kind = OFX_UI_WIDGET_TOGGLE;
 }
 
-ofxUIToggle::ofxUIToggle(float x, float y, float w, float h, bool _value, string _name, int _size)
-: ofxUIButton( _name, _value, w, h, x, y, _size )
-{
-    kind = OFX_UI_WIDGET_TOGGLE;
-    //        ofLogWarning("OFXUITOGGLE: DON'T USE THIS CONSTRUCTOR. THIS WILL BE REMOVED ON FUTURE RELEASES.");
-}
-
-ofxUIToggle::ofxUIToggle(float w, float h, bool _value, string _name, int _size)
-: ofxUIButton( _name, _value, w, h, 0, 0, _size )
-{
-    kind = OFX_UI_WIDGET_TOGGLE;
-    //        ofLogWarning("OFXUITOGGLE: DON'T USE THIS CONSTRUCTOR. THIS WILL BE REMOVED ON FUTURE RELEASES.");
-}
-
-ofxUIToggle::ofxUIToggle(float x, float y, float w, float h, bool *_value, string _name, int _size)
-: ofxUIButton( _name, _value, w, h, x, y, _size )
-{
-    kind = OFX_UI_WIDGET_TOGGLE;
-    //        ofLogWarning("OFXUITOGGLE: DON'T USE THIS CONSTRUCTOR. THIS WILL BE REMOVED ON FUTURE RELEASES.");
-}
-
-ofxUIToggle::ofxUIToggle(float w, float h, bool *_value, string _name, int _size)
-: ofxUIButton( _name, _value, w, h, 0, 0, _size )
-{
-    kind = OFX_UI_WIDGET_TOGGLE;
-    //        ofLogWarning("OFXUITOGGLE: DON'T USE THIS CONSTRUCTOR. THIS WILL BE REMOVED ON FUTURE RELEASES.");
-}
-
 void ofxUIToggle::setDrawPadding(bool _draw_padded_rect)
 {
     draw_padded_rect = _draw_padded_rect;
@@ -127,7 +99,7 @@ void ofxUIToggle::mouseReleased(int x, int y, int button)
     if((rect->inside(x, y) || (label->isVisible() && label->getPaddingRect()->inside(x, y))) && hit)
     {
         setValue(!(*value));
-#ifdef TARGET_OPENGLES
+#ifdef OFX_UI_TARGET_TOUCH
         state = OFX_UI_STATE_NORMAL;
 #else
         state = OFX_UI_STATE_OVER;
@@ -142,9 +114,28 @@ void ofxUIToggle::mouseReleased(int x, int y, int button)
     hit = false;
 }
 
+void ofxUIToggle::setParent(ofxUIWidget *_parent)
+{
+    ofxUIButton::setParent(_parent);
+}
+
 void ofxUIToggle::setValue(bool _value)
 {
     *value = _value;
     draw_fill = *value;
-    //        label->setDrawBack((*value));
 }
+
+#ifndef OFX_UI_NO_XML
+
+void ofxUIToggle::saveState(ofxXmlSettings *XML)
+{
+    XML->setValue("Value", (getValue() ? 1 : 0), 0);
+}
+
+void ofxUIToggle::loadState(ofxXmlSettings *XML)
+{
+    int value = XML->getValue("Value", (getValue() ? 1 : 0), 0);
+    setValue((value ? 1 : 0));
+}
+
+#endif

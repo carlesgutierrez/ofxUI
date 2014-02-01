@@ -29,14 +29,12 @@
 class ofxUIImageSampler : public ofxUIImage
 {
 public:
-    ofxUIImageSampler(float x, float y, float w, float h, ofImage *_image, string _name);
-    ofxUIImageSampler(float w, float h, ofImage *_image, string _name);
+    ofxUIImageSampler(float x, float y, float w, float h, ofImage _image, string _name);
+    ofxUIImageSampler(float w, float h, ofImage _image, string _name);
     void initSampler();
     void setSquareSize(float _squareSize);
     void drawFill();
     void drawFillHighlight();
-    void setVisible(bool _visible);
-    void setParent(ofxUIWidget *_parent);
     void mouseDragged(int x, int y, int button);
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
@@ -47,6 +45,11 @@ public:
     ofPoint getValue();
     void setValue(ofPoint _value);
     bool isDraggable();
+    bool hasState(){ return true; };
+#ifndef OFX_UI_NO_XML
+    virtual void saveState(ofxXmlSettings *XML);
+    virtual void loadState(ofxXmlSettings *XML);
+#endif    
     
 protected: 
     ofColor sampledColor; 

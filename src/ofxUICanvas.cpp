@@ -28,12 +28,24 @@
 ofxUICanvas::~ofxUICanvas()
 {
     disable();
-    delete GUIevent;
+    if(GUIevent != NULL)
+    {
+        delete GUIevent;
+    }
     if(!hasSharedResources)
     {
-        delete font_large;
-        delete font_medium;
-        delete font_small;
+        if(font_large != NULL)
+        {
+            delete font_large;
+        }
+        if(font_medium != NULL)
+        {
+            delete font_medium;
+        }
+        if(font_small != NULL)
+        {
+            delete font_small;
+        }
     }
     for(vector<ofxUIWidget *>::iterator it = widgets.begin(); it != widgets.end(); ++it)
     {
@@ -45,47 +57,42 @@ ofxUICanvas::~ofxUICanvas()
 
 ofxUICanvas::ofxUICanvas(ofxUIRectangle r) : ofxUIWidget()
 {
-    rect = new ofxUIRectangle(r);
-    init(r.width,r.height);
+    init(r.getX(false), r.getY(false), r.width, r.height);
 }
 
 ofxUICanvas::ofxUICanvas(float x, float y, float w, float h) : ofxUIWidget()
 {
-    rect = new ofxUIRectangle(x,y,w,h);
-    init(w,h);
+    init(x, y, w, h);
 }
 
 ofxUICanvas::ofxUICanvas(float x, float y, float w, float h, ofxUICanvas *sharedResources) : ofxUIWidget()
 {
-    rect = new ofxUIRectangle(x,y,w,h);
-    init(w,h, sharedResources);
+    init(x, y, w, h,sharedResources);
 }
 
 ofxUICanvas::ofxUICanvas(float defaultWidthSize, float defaultHeightSize) : ofxUIWidget()
 {
-    rect = new ofxUIRectangle(0,0,defaultWidthSize,defaultHeightSize);
-    init(defaultWidthSize, defaultHeightSize);
+    init(0, 0, defaultWidthSize, defaultHeightSize);
     setGlobalCanvasWidth(defaultWidthSize);
 }
 
 ofxUICanvas::ofxUICanvas(ofxUICanvas *sharedResources, float defaultWidthSize, float defaultHeightSize) : ofxUIWidget()
 {
-    rect = new ofxUIRectangle(0,0,defaultWidthSize,defaultHeightSize);
-    init(defaultWidthSize, defaultHeightSize, sharedResources);
+    init(0, 0, defaultWidthSize, defaultHeightSize, sharedResources);
     setGlobalCanvasWidth(defaultWidthSize);
 }
 
 ofxUICanvas::ofxUICanvas(string title) : ofxUIWidget()
 {
-    rect = new ofxUIRectangle(0, 0, 316, ofxUIGetHeight());
-    init(46, ofxUIGetHeight());
+    init(0, 0, 46, ofxUIGetHeight());
     addWidgetDown(new ofxUILabel(title, OFX_UI_FONT_LARGE));
     addWidgetDown(new ofxUISpacer(0, 20));
     addWidgetDown(new ofxUIFPSSlider(300, 20, 0, 1000, ofGetFrameRate(), "FPS"));
 }
 
-void ofxUICanvas::init(int w, int h, ofxUICanvas *sharedResources)
+void ofxUICanvas::init(int x, int y, int w, int h, ofxUICanvas *sharedResources)
 {
+    initRect(x, y, w, h);
     name = string("OFX_UI_WIDGET_CANVAS");
     kind = OFX_UI_WIDGET_CANVAS;
     
@@ -98,9 +105,6 @@ void ofxUICanvas::init(int w, int h, ofxUICanvas *sharedResources)
     autoDraw = true;
     autoUpdate = true;
     bTriggerWidgetsUponLoad = true;
-    
-    paddedRect = new ofxUIRectangle(-padding, -padding, w+padding*2.0, h+padding*2.0);
-    paddedRect->setParent(rect);
     
     if(sharedResources != NULL)
     {
@@ -198,112 +202,12 @@ void ofxUICanvas::saveSettings(string fileName)
         {
             XML->setValue("Kind", widgetsWithState[i]->getKind(), 0);
             XML->setValue("Name", widgetsWithState[i]->getName(), 0);
-            writeSpecificWidgetData(widgetsWithState[i], XML);
+            widgetsWithState[i]->saveState(XML);
         }
         XML->popTag();
     }
     XML->saveFile(fileName);
     delete XML;
-}
-
-void ofxUICanvas::writeSpecificWidgetData(ofxUIWidget *widget, ofxXmlSettings *XML)
-{
-    int kind = widget->getKind();
-    switch (kind) {
-        case OFX_UI_WIDGET_IMAGETOGGLE:
-        case OFX_UI_WIDGET_MULTIIMAGETOGGLE:
-        case OFX_UI_WIDGET_LABELTOGGLE:
-        case OFX_UI_WIDGET_TOGGLE:
-        {
-            ofxUIToggle *toggle = (ofxUIToggle *) widget;
-            XML->setValue("Value", (toggle->getValue() ? 1 : 0), 0);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_IMAGESLIDER_H:
-        case OFX_UI_WIDGET_IMAGESLIDER_V:
-        case OFX_UI_WIDGET_BILABELSLIDER:
-        case OFX_UI_WIDGET_CIRCLESLIDER:
-        case OFX_UI_WIDGET_MINIMALSLIDER:
-        case OFX_UI_WIDGET_SLIDER_H:
-        case OFX_UI_WIDGET_SLIDER_V:
-        {
-            ofxUISlider *slider = (ofxUISlider *) widget;
-            XML->setValue("Value", slider->getScaledValue(), 0);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_INTSLIDER_H:
-        case OFX_UI_WIDGET_INTSLIDER_V:
-        {
-            ofxUIIntSlider *slider = (ofxUIIntSlider *) widget;
-            XML->setValue("Value", slider->getValue(), 0);
-        }
-            break;
-
-            
-        case OFX_UI_WIDGET_RSLIDER_H:
-        case OFX_UI_WIDGET_RSLIDER_V:
-        {
-            ofxUIRangeSlider *rslider = (ofxUIRangeSlider *) widget;
-            XML->setValue("HighValue", rslider->getScaledValueHigh(), 0);
-            XML->setValue("LowValue", rslider->getScaledValueLow(), 0);
-        }
-            break;
-			
-		case OFX_UI_WIDGET_SSLIDER_H:
-		case OFX_UI_WIDGET_SSLIDER_V:
-		{
-			ofxUIScrollSlider *sslider = (ofxUIScrollSlider *) widget; 
-			XML->setValue("HighScrollValue", sslider->getScaledValueHigh(), 0); 
-			XML->setValue("LowScrollValue", sslider->getScaledValueLow(), 0);                 
-		}
-			break;
-            
-        case OFX_UI_WIDGET_NUMBERDIALER:
-        {
-            ofxUINumberDialer *numdialer = (ofxUINumberDialer *) widget;
-            XML->setValue("Value", numdialer->getValue(), 0);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_2DPAD:
-        {
-            ofxUI2DPad *pad = (ofxUI2DPad *) widget;
-            XML->setValue("XValue", pad->getScaledValue().x, 0);
-            XML->setValue("YValue", pad->getScaledValue().y, 0);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_TEXTINPUT:
-        {
-            ofxUITextInput *textInput = (ofxUITextInput *) widget;
-            XML->setValue("Value", textInput->getTextString(), 0);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_ROTARYSLIDER:
-        {
-            ofxUIRotarySlider *rotslider = (ofxUIRotarySlider *) widget;
-            XML->setValue("Value", rotslider->getScaledValue(), 0);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_IMAGESAMPLER:
-        {
-            ofxUIImageSampler *imageSampler = (ofxUIImageSampler *) widget;
-            XML->setValue("XValue", imageSampler->getValue().x, 0);
-            XML->setValue("YValue", imageSampler->getValue().y, 0);
-            XML->setValue("RColor", imageSampler->getColor().r, 0);
-            XML->setValue("GColor", imageSampler->getColor().g, 0);
-            XML->setValue("BColor", imageSampler->getColor().b, 0);
-            XML->setValue("AColor", imageSampler->getColor().a, 0);
-        }
-            break;
-            
-        default:
-            break;
-    }
 }
 
 void ofxUICanvas::setTriggerWidgetsUponLoad(bool _bTriggerWidgetsUponLoad)
@@ -326,9 +230,9 @@ void ofxUICanvas::loadSettings(string fileName)
         XML->pushTag("Widget", i);
         string name = XML->getValue("Name", "NULL", 0);
         ofxUIWidget *widget = getWidget(name);
-        if(widget != NULL)
+        if(widget != NULL && widget->hasState())
         {
-            loadSpecificWidgetData(widget, XML);
+            widget->loadState(XML);
             if(bTriggerWidgetsUponLoad){
                 triggerEvent(widget);
             }
@@ -337,122 +241,6 @@ void ofxUICanvas::loadSettings(string fileName)
     }
     hasKeyBoard = false;
     delete XML;
-}
-
-void ofxUICanvas::loadSpecificWidgetData(ofxUIWidget *widget, ofxXmlSettings *XML)
-{
-    int kind = widget->getKind();
-    switch (kind)
-    {
-        case OFX_UI_WIDGET_IMAGETOGGLE:
-        case OFX_UI_WIDGET_MULTIIMAGETOGGLE:
-        case OFX_UI_WIDGET_LABELTOGGLE:
-        case OFX_UI_WIDGET_TOGGLE:
-        {
-            ofxUIToggle *toggle = (ofxUIToggle *) widget;
-            int value = XML->getValue("Value", (toggle->getValue() ? 1 : 0), 0);
-            toggle->setValue((value ? 1 : 0));
-        }
-            break;
-            
-        case OFX_UI_WIDGET_IMAGESLIDER_H:
-        case OFX_UI_WIDGET_IMAGESLIDER_V:
-        case OFX_UI_WIDGET_BILABELSLIDER:
-        case OFX_UI_WIDGET_CIRCLESLIDER:
-        case OFX_UI_WIDGET_MINIMALSLIDER:
-        case OFX_UI_WIDGET_SLIDER_H:
-        case OFX_UI_WIDGET_SLIDER_V:
-        {
-            ofxUISlider *slider = (ofxUISlider *) widget;
-            float value = XML->getValue("Value", slider->getScaledValue(), 0);
-            slider->setValue(value);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_INTSLIDER_H:
-        case OFX_UI_WIDGET_INTSLIDER_V:
-        {
-            ofxUIIntSlider *slider = (ofxUIIntSlider *) widget;
-            float value = XML->getValue("Value", slider->getValue(), 0);
-            slider->setValue(value);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_RSLIDER_H:
-        case OFX_UI_WIDGET_RSLIDER_V:
-        {
-            ofxUIRangeSlider *rslider = (ofxUIRangeSlider *) widget;
-            float valueHigh = XML->getValue("HighValue", rslider->getScaledValueHigh(), 0);
-            float valueLow = XML->getValue("LowValue", rslider->getScaledValueLow(), 0);
-            rslider->setValueHigh(valueHigh);
-            rslider->setValueLow(valueLow);
-        }
-            break;
-            
-		case OFX_UI_WIDGET_SSLIDER_H:
-		case OFX_UI_WIDGET_SSLIDER_V:
-		{
-			ofxUIScrollSlider *sslider = (ofxUIScrollSlider *) widget; 
-			float valueHigh = XML->getValue("HighScrollValue", sslider->getScaledValueHigh(), 0); 
-			float valueLow = XML->getValue("LowScrollValue", sslider->getScaledValueLow(), 0); 
-			sslider->setValueHigh(valueHigh);
-			sslider->setValueLow(valueLow);
-		}
-			break;
-			
-        case OFX_UI_WIDGET_NUMBERDIALER:
-        {
-            ofxUINumberDialer *numdialer = (ofxUINumberDialer *) widget;
-            float value = XML->getValue("Value", numdialer->getValue(), 0);
-            numdialer->setValue(value);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_2DPAD:
-        {
-            ofxUI2DPad *pad = (ofxUI2DPad *) widget;
-            float valueX = XML->getValue("XValue", pad->getScaledValue().x, 0);
-            float valueY = XML->getValue("YValue", pad->getScaledValue().y, 0);
-            pad->setValue(ofxUIVec3f(valueX, valueY));
-        }
-            break;
-            
-        case OFX_UI_WIDGET_TEXTINPUT:
-        {
-            ofxUITextInput *textInput = (ofxUITextInput *) widget;
-            string value = XML->getValue("Value", textInput->getTextString(), 0);
-            textInput->setTextString(value);
-            textInput->setTriggerType(OFX_UI_TEXTINPUT_ON_LOAD);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_ROTARYSLIDER:
-        {
-            ofxUIRotarySlider *rotslider = (ofxUIRotarySlider *) widget;
-            float value = XML->getValue("Value", rotslider->getScaledValue(), 0);
-            rotslider->setValue(value);
-        }
-            break;
-            
-        case OFX_UI_WIDGET_IMAGESAMPLER:
-        {
-            ofxUIImageSampler *imageSampler = (ofxUIImageSampler *) widget;
-            float valueX = XML->getValue("XValue", imageSampler->getValue().x, 0);
-            float valueY = XML->getValue("YValue", imageSampler->getValue().y, 0);
-            
-            int r = XML->getValue("RColor", imageSampler->getColor().r, 0);
-            int g = XML->getValue("GColor", imageSampler->getColor().g, 0);
-            int b = XML->getValue("BColor", imageSampler->getColor().b, 0);
-            int a = XML->getValue("AColor", imageSampler->getColor().a, 0);
-            
-            imageSampler->setValue(ofxUIVec2f(valueX, valueY));
-            imageSampler->setColor(ofxUIColor(r,g,b,a));
-        }
-            break;
-            
-        default:
-            break;
-    }
 }
 
 #endif
@@ -989,7 +777,6 @@ void ofxUICanvas::centerWidgetsOnCanvas(bool centerHorizontally, bool centerVert
             if(centerVertically) wr->y += moveDeltaY-padding;
         }
     }
-    //        addWidget(new ofxUISpacer(xMin+moveDeltaX, yMin+moveDeltaY, w, h));
 }
 
 void ofxUICanvas::centerWidgetsHorizontallyOnCanvas()
@@ -1111,144 +898,27 @@ void ofxUICanvas::removeWidget(ofxUIWidget *widget)
 
 void ofxUICanvas::addWidget(ofxUIWidget *widget)
 {
+    if(widget->hasState())
+    {
+		widgetsWithState.push_back(widget);
+    }
     widget->setPadding(padding);
+    
     for(int i = 0; i < widget->getEmbeddedWidgetsSize(); i++)
     {
         ofxUIWidget *child = widget->getEmbeddedWidget(i);
         this->addWidget(child);
+        child->setParent(widget);
         child->setRectParent(widget->getRect());
     }
     
-    if(widget->hasLabel())
-    {
-        ofxUIWidgetWithLabel *wwl = (ofxUIWidgetWithLabel *) widget;
-        ofxUILabel *label = wwl->getLabelWidget();
-        setLabelFont(label);
-        setWidgetColor(label);
-        pushbackWidget(label);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_LABEL)
+    if(widget->getKind() == OFX_UI_WIDGET_LABEL)
     {
         ofxUILabel *label = (ofxUILabel *) widget;
         setLabelFont(label);
         setWidgetColor(label);
     }
     
-    if(widget->getKind() == OFX_UI_WIDGET_SLIDER_H || widget->getKind() == OFX_UI_WIDGET_SLIDER_V || widget->getKind() == OFX_UI_WIDGET_INTSLIDER_H || widget->getKind() == OFX_UI_WIDGET_INTSLIDER_V || widget->getKind() == OFX_UI_WIDGET_BILABELSLIDER || widget->getKind() == OFX_UI_WIDGET_MINIMALSLIDER || widget->getKind() == OFX_UI_WIDGET_CIRCLESLIDER || widget->getKind() == OFX_UI_WIDGET_IMAGESLIDER_H || widget->getKind() == OFX_UI_WIDGET_IMAGESLIDER_V)
-    {
-        if(widget->getKind() == OFX_UI_WIDGET_BILABELSLIDER)
-        {
-            ofxUIBiLabelSlider *biSlider = (ofxUIBiLabelSlider *) widget;
-            ofxUILabel *rlabel = (ofxUILabel *) biSlider->getRightLabel();
-            setLabelFont(rlabel);
-            pushbackWidget(rlabel);
-        }
-        
-        widgetsWithState.push_back(widget);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_2DPAD)
-    {
-        widgetsWithState.push_back(widget);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_IMAGE)
-    {
-        
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_IMAGESAMPLER)
-    {
-        widgetsWithState.push_back(widget);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_RSLIDER_H || widget->getKind() == OFX_UI_WIDGET_RSLIDER_V)
-    {
-        widgetsWithState.push_back(widget);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_ROTARYSLIDER)
-    {
-        widgetsWithState.push_back(widget);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_BUTTON || widget->getKind() ==  OFX_UI_WIDGET_LABELBUTTON || widget->getKind() == OFX_UI_WIDGET_LABELTOGGLE || widget->getKind() == OFX_UI_WIDGET_MULTIIMAGEBUTTON || widget->getKind() == OFX_UI_WIDGET_MULTIIMAGETOGGLE || widget->getKind() == OFX_UI_WIDGET_CUSTOMIMAGEBUTTON)
-    {
-        if(widget->getKind() != OFX_UI_WIDGET_BUTTON && widget->getKind() != OFX_UI_WIDGET_LABELBUTTON && widget->getKind() != OFX_UI_WIDGET_MULTIIMAGEBUTTON && widget->getKind() != OFX_UI_WIDGET_CUSTOMIMAGEBUTTON)
-        {
-            widgetsWithState.push_back(widget);
-        }
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_DROPDOWNLIST)
-    {
-        ofxUIDropDownList *list = (ofxUIDropDownList *) widget;
-        vector<ofxUILabelToggle *> toggles = list->getToggles();
-        for(unsigned int i = 0; i < toggles.size(); i++)
-        {
-            ofxUILabelToggle *t = toggles[i];
-            ofxUILabel *l2 = (ofxUILabel *) t->getLabel();
-            setLabelFont(l2);
-            pushbackWidget(l2);
-            pushbackWidget(t);
-            widgetsWithState.push_back(t);
-        }
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_SORTABLELIST)
-    {
-        ofxUISortableList *list = (ofxUISortableList *) widget;
-        vector<ofxUIDraggableLabelButton*> toggles = list->getListItems();
-        for(int i = 0; i < toggles.size(); i++)
-        {
-            ofxUIDraggableLabelButton *t = toggles[i];
-            ofxUILabel *l2 = (ofxUILabel *) t->getLabel();
-            setLabelFont(l2);
-            pushbackWidget(l2);
-            pushbackWidget(t);
-        }
-        widgetsWithState.push_back(list);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_TEXTINPUT)
-    {
-        widgetsWithState.push_back(widget);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_NUMBERDIALER)
-    {
-        widgetsWithState.push_back(widget);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_TOGGLE)
-    {
-        widgetsWithState.push_back(widget);
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_RADIO)
-    {
-        ofxUIRadio *radio = (ofxUIRadio *) widget;
-        vector<ofxUIToggle *> toggles = radio->getToggles();
-        
-        for(unsigned int i = 0; i < toggles.size(); i++)
-        {
-            ofxUIToggle *t = toggles[i];
-            ofxUILabel *l2 = (ofxUILabel *) t->getLabel();
-            setLabelFont(l2);
-            pushbackWidget(t);
-            pushbackWidget(l2);
-            
-            widgetsWithState.push_back(t);
-        }
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_TOGGLEMATRIX)
-    {
-        ofxUIToggleMatrix *matrix = (ofxUIToggleMatrix *) widget;
-        vector<ofxUIToggle *> toggles = matrix->getToggles();
-        
-        for(unsigned int i = 0; i < toggles.size(); i++)
-        {
-            ofxUIToggle *t = toggles[i];
-            ofxUILabel *l2 = (ofxUILabel *) t->getLabel();
-            setLabelFont(l2);
-            pushbackWidget(t);
-            pushbackWidget(l2);
-            
-            widgetsWithState.push_back(t);
-        }
-    }
-    else if(widget->getKind() == OFX_UI_WIDGET_IMAGETOGGLE)
-    {
-        widgetsWithState.push_back(widget);
-    }
     setWidgetDrawingProperties(widget);
     setWidgetColor(widget);
     widget->setParent(this);
@@ -1260,7 +930,6 @@ ofxUIWidget* ofxUICanvas::addWidgetPosition(ofxUIWidget *widget, ofxUIWidgetPosi
 {
     if(!reAdd) addWidget(widget);
     ofxUIRectangle *widgetRect = widget->getRect();
-    ofxUIRectangle *widgetPaddingRect = widget->getPaddingRect();
     ofxUIWidget* lastAdded = lastAddeds.empty() ? NULL : lastAddeds.back();
     if(lastAdded != NULL)
     {
@@ -1552,6 +1221,34 @@ ofxUIIntSlider* ofxUICanvas::addIntSlider(string _name, int _min, int _max, int 
     return widget;
 }
 
+ofxUIDoubleSlider* ofxUICanvas::addDoubleSlider(string _name, double _min, double _max, double _value)
+{
+    ofxUIDoubleSlider* widget = new ofxUIDoubleSlider(_name, _min, _max, _value, rect->getWidth()-widgetSpacing*2, globalSliderHeight, 0, 0);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+
+ofxUIDoubleSlider* ofxUICanvas::addDoubleSlider(string _name, double _min, double _max, double _value, float w, float h, float x, float y)
+{
+    ofxUIDoubleSlider* widget = new ofxUIDoubleSlider(_name, _min, _max, _value, w, h, x, y);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+
+ofxUIDoubleSlider* ofxUICanvas::addDoubleSlider(string _name, double _min, double _max, double *_value)
+{
+    ofxUIDoubleSlider* widget = new ofxUIDoubleSlider(_name, _min, _max, _value, rect->getWidth()-widgetSpacing*2, globalSliderHeight, 0, 0);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+
+ofxUIDoubleSlider* ofxUICanvas::addDoubleSlider(string _name, double _min, double _max, double *_value, float w, float h, float x, float y)
+{
+    ofxUIDoubleSlider* widget = new ofxUIDoubleSlider(_name, _min, _max, _value, w, h, x, y);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+
 ofxUIRotarySlider* ofxUICanvas::addRotarySlider(string _name, float _min, float _max, float _value, int _size)
 {
     ofxUIRotarySlider* widget = new ofxUIRotarySlider(rect->getWidth()-widgetSpacing*2, _min, _max, _value, _name, _size);
@@ -1658,7 +1355,7 @@ ofxUIRangeSlider* ofxUICanvas::addRangeSlider(string _name, float _min, float _m
 }
 
 ofxUIRangeSlider* ofxUICanvas::addRangeSlider(string _name, float _min, float _max, float _valuelow, float _valuehigh,
-                                 float w, float h, float x, float y)
+											  float w, float h, float x, float y)
 {
     ofxUIRangeSlider* widget = new ofxUIRangeSlider(_name, _min, _max, _valuelow, _valuehigh, w, h, x, y);
     addWidgetPosition(widget, widgetPosition, widgetAlign);
@@ -1673,7 +1370,7 @@ ofxUIRangeSlider* ofxUICanvas::addRangeSlider(string _name, float _min, float _m
 }
 
 ofxUIRangeSlider* ofxUICanvas::addRangeSlider(string _name, float _min, float _max, float *_valuelow, float *_valuehigh,
-                                 float w, float h, float x, float y)
+											  float w, float h, float x, float y)
 {
     ofxUIRangeSlider* widget = new ofxUIRangeSlider(_name, _min, _max, _valuelow, _valuehigh, w, h, x, y);
     addWidgetPosition(widget, widgetPosition, widgetAlign);
@@ -1910,7 +1607,7 @@ ofxUILabelButton* ofxUICanvas::addLabelButton(string _name, bool *_value, float 
 
 ofxUIDropDownList* ofxUICanvas::addDropDownList(string _name, vector<string> items)
 {
-    ofxUIDropDownList* widget = new ofxUIDropDownList(_name, items, rect->getWidth()-widgetSpacing*2, globalButtonDimension, 0, widgetFontSize);
+    ofxUIDropDownList* widget = new ofxUIDropDownList(_name, items, rect->getWidth()-widgetSpacing*2, 0, 0, widgetFontSize);
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
@@ -1975,7 +1672,7 @@ ofxUIMovingGraph* ofxUICanvas::addMovingGraph(string _name, vector<float> _buffe
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
-
+/*
 ofxUIImage* ofxUICanvas::addImage(string _name, ofImage *_image, float _w, float _h, bool _showLabel)
 {
     ofxUIImage* widget = new ofxUIImage(_w, _h, _image, _name, _showLabel);
@@ -1988,6 +1685,22 @@ ofxUIImage* ofxUICanvas::addImage(string _name, ofImage *_image, bool _showLabel
     float _w = rect->getWidth()-widgetSpacing*2;
     float _h = _w*(float)_image->getHeight()/(float)_image->getWidth();
     ofxUIImage* widget = new ofxUIImage(_w, _h, _image, _name, _showLabel);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}*/
+
+ofxUIImage* ofxUICanvas::addImage(string _name, ofImage *_image, float _w, float _h, bool _showLabel)
+{
+    ofxUIImage* widget = new ofxUIImage(_w, _h, *_image, _name, _showLabel); // *
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+
+ofxUIImage* ofxUICanvas::addImage(string _name, ofImage *_image, bool _showLabel)
+{
+    float _w = rect->getWidth()-widgetSpacing*2;
+    float _h = _w*(float)_image->getHeight()/(float)_image->getWidth();
+    ofxUIImage* widget = new ofxUIImage(_w, _h, *_image, _name, _showLabel);// *
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
@@ -2007,9 +1720,10 @@ ofxUIBaseDraws* ofxUICanvas::addBaseDraws(string _name, ofBaseDraws *_base, bool
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
+
 ofxUIImageSampler* ofxUICanvas::addImageSampler(string _name, ofImage *_image, float _w, float _h)
 {
-    ofxUIImageSampler* widget = new ofxUIImageSampler(_w, _h, _image, _name);
+    ofxUIImageSampler* widget = new ofxUIImageSampler(_w, _h, *_image, _name);
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
@@ -2018,7 +1732,7 @@ ofxUIImageSampler* ofxUICanvas::addImageSampler(string _name, ofImage *_image)
 {
     float _w = rect->getWidth()-widgetSpacing*2;
     float _h = _w*(float)_image->getHeight()/(float)_image->getWidth();
-    ofxUIImageSampler* widget = new ofxUIImageSampler(_w, _h, _image, _name);
+    ofxUIImageSampler* widget = new ofxUIImageSampler(_w, _h, *_image, _name);
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }

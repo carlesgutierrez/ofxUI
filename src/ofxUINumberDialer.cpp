@@ -29,29 +29,25 @@
 ofxUINumberDialer::ofxUINumberDialer(float x, float y, float _min, float _max, float _value, int _precision, string _name, int _size) : ofxUIWidgetWithLabel()
 {
     useReference = false;
-    rect = new ofxUIRectangle(x,y,0,0);
-    init(_min, _max, &_value, _precision, _name, _size);
+    init(x,y,0,0, _min, _max, &_value, _precision, _name, _size);
 }
 
 ofxUINumberDialer::ofxUINumberDialer(float _min, float _max, float _value, int _precision, string _name, int _size) : ofxUIWidgetWithLabel()
 {
     useReference = false;
-    rect = new ofxUIRectangle(0,0,0,0);
-    init(_min, _max, &_value, _precision, _name, _size);
+    init(0,0,0,0, _min, _max, &_value, _precision, _name, _size);
 }
 
 ofxUINumberDialer::ofxUINumberDialer(float x, float y, float _min, float _max, float *_value, int _precision, string _name, int _size) : ofxUIWidgetWithLabel()
 {
     useReference = true;
-    rect = new ofxUIRectangle(x,y,0,0);
-    init(_min, _max, _value, _precision, _name, _size);
+    init(x,y,0,0, _min, _max, _value, _precision, _name, _size);
 }
 
 ofxUINumberDialer::ofxUINumberDialer(float _min, float _max, float *_value, int _precision, string _name, int _size) : ofxUIWidgetWithLabel()
 {
     useReference = true;
-    rect = new ofxUIRectangle(0,0,0,0);
-    init(_min, _max, _value, _precision, _name, _size);
+    init(0,0,0,0, _min, _max, _value, _precision, _name, _size);
 }
 
 ofxUINumberDialer::~ofxUINumberDialer()
@@ -62,8 +58,9 @@ ofxUINumberDialer::~ofxUINumberDialer()
     }
 }
 
-void ofxUINumberDialer::init(float _min, float _max, float *_value, int _precision, string _name, int _size)
+void ofxUINumberDialer::init(float x, float y, float w, float h, float _min, float _max, float *_value, int _precision, string _name, int _size)
 {
+    initRect(x, y, w, h);
     name = string(_name);
     kind = OFX_UI_WIDGET_NUMBERDIALER;
     
@@ -89,7 +86,6 @@ void ofxUINumberDialer::init(float _min, float _max, float *_value, int _precisi
     }
     precision = _precision;
     currentPrecisionZone = 1;
-    
     
     string minString = ofxUIToString(min, precision);
     string maxString = ofxUIToString(max, precision);
@@ -118,21 +114,16 @@ void ofxUINumberDialer::init(float _min, float _max, float *_value, int _precisi
     
     displaystring = textstring;
     
-    paddedRect = new ofxUIRectangle(-padding, -padding, padding*2.0, padding*2.0);
-    paddedRect->setParent(rect);
-    
     for(int i = 0; i < numOfPrecisionZones; i++)
     {
         temp+="0";
     }
     
-    displayLabel = false;
-    label = new ofxUILabel(padding,0,(name+" LABEL"), temp, _size);
-    label->setParent(label);
-    label->setRectParent(rect);
-    label->setEmbedded(true);
-    label->setVisible(false);
     draw_fill = true;
+    drawLabel = false;
+    
+    label = new ofxUILabel(0,0,(name+" LABEL"), temp, _size);
+    addEmbeddedWidget(label);
 }
 
 void ofxUINumberDialer::update()
@@ -150,14 +141,9 @@ void ofxUINumberDialer::drawFill()
     {
         ofxUIFill();
         ofxUISetColor(color_fill);
-        float x = label->getRect()->getX();
+        float x = rect->getX()+padding;
         float y = label->getRect()->getY()+label->getRect()->getHeight();
         float w = label->getStringWidth("_");
-        
-        if(displayLabel)
-        {
-            label->drawString(x+rect->getWidth(), y, name);
-        }
         
         for(unsigned int i = 0; i < displaystring.size(); i++)
         {
@@ -174,15 +160,10 @@ void ofxUINumberDialer::drawFillHighlight()
     {
         ofxUIFill();
         ofxUISetColor(color_fill_highlight);
-        float x = label->getRect()->getX();
+        float x = rect->getX()+padding;
         float y = label->getRect()->getY()+label->getRect()->getHeight();
         float w = label->getStringWidth("_");
         ofxUIDrawRect(x+currentPrecisionZone*w,y+padding*.5,w, padding*.5);
-        
-        if(displayLabel)
-        {
-            label->drawString(x+rect->getWidth(), y, name);
-        }
         
         for(unsigned int i = 0; i < displaystring.size(); i++)
         {
@@ -300,7 +281,7 @@ void ofxUINumberDialer::mouseReleased(int x, int y, int button)
 {
     if(hit)
     {
-#ifdef TARGET_OPENGLES
+#ifdef OFX_UI_TARGET_TOUCH
         state = OFX_UI_STATE_NORMAL;
 #else
         state = OFX_UI_STATE_OVER;
@@ -438,17 +419,6 @@ void ofxUINumberDialer::stateChange()
     }
 }
 
-void ofxUINumberDialer::setVisible(bool _visible)
-{
-    visible = _visible;
-    label->setVisible(false);
-}
-
-ofxUILabel *ofxUINumberDialer::getLabel()
-{
-    return label;
-}
-
 string ofxUINumberDialer::getTextString()
 {
     return textstring;
@@ -466,7 +436,6 @@ void ofxUINumberDialer::setTextString(string s)
     }
     textstring = s;
     displaystring = s;
-    label->setLabel(displaystring);
 }
 
 void ofxUINumberDialer::setParent(ofxUIWidget *_parent)
@@ -477,13 +446,12 @@ void ofxUINumberDialer::setParent(ofxUIWidget *_parent)
     ofxUIRectangle *labelrect = label->getRect();
     labelrect->setX(padding*2.0);
     float h = labelrect->getHeight();
-    float ph = rect->getHeight();
-    
-    labelrect->y = ph/2.0 - h/2.0;
-    
-    paddedRect->height = rect->height+padding*2.0;
-    paddedRect->width = rect->width+padding*2.0;
+    float ph = rect->getHeight();    
+    labelrect->setY(ph/2.0 - h/2.0);
+    labelrect->setX(rect->getWidth()+padding);
+    label->setLabel(name); 
     setTextString(numToString(abs(*value), precision, numOfPrecisionZones, '0'));
+    calculatePaddingRect();    
 }
 
 bool ofxUINumberDialer::isDraggable()
@@ -498,15 +466,16 @@ string ofxUINumberDialer::numToString(float value, int precision, int width, cha
     return out.str();
 }
 
-void ofxUINumberDialer::setDisplayLabel(bool _displayLabel)
+#ifndef OFX_UI_NO_XML
+
+void ofxUINumberDialer::saveState(ofxXmlSettings *XML)
 {
-    displayLabel = _displayLabel;
-    if(displayLabel)
-    {
-        paddedRect->width = rect->width+padding*2.0 + label->getStringWidth(name)+padding*3.0;
-    }
-    else
-    {
-        paddedRect->width = rect->width+padding*2.0;
-    }
+    XML->setValue("Value", getValue(), 0);
 }
+
+void ofxUINumberDialer::loadState(ofxXmlSettings *XML)
+{
+    setValue(XML->getValue("Value", getValue(), 0));
+}
+
+#endif

@@ -32,20 +32,18 @@ ofxUITextArea::ofxUITextArea(string _name, string _textstring, float w, float h,
 
 void ofxUITextArea::init(string _name, string _textstring, float w, float h, float x, float y, int _size)
 {
-    rect = new ofxUIRectangle(x,y,w,h);
+    initRect(x,y,w,h);
     name = string(_name);
     kind = OFX_UI_WIDGET_TEXTAREA;
     textstring = _textstring;
     setDrawFill(true);
     setDrawBack(false);
     drawShadow = false;
-    paddedRect = new ofxUIRectangle(-padding, -padding, w+padding*2.0, padding*2.0);
-    paddedRect->setParent(rect);
+    drawLabel = false;
     
     label = new ofxUILabel(padding*2.0,0,(name+" LABEL"), _size);
-    label->setParent(label);
-    label->setRectParent(rect);
-    label->setEmbedded(true);
+    addEmbeddedWidget(label);
+    label->setVisible(drawLabel);
     
     if(h == 0)
     {
@@ -86,12 +84,6 @@ void ofxUITextArea::drawFill()
             label->drawString(rect->getX(), rect->getY()+(lineHeight+lineSpaceSize)*(i+1)-lineSpaceSize, textLines[i]);
         }
     }
-}
-
-void ofxUITextArea::setVisible(bool _visible)
-{
-    visible = _visible;
-    label->setVisible(false);
 }
 
 string ofxUITextArea::getTextString()
@@ -195,8 +187,7 @@ void ofxUITextArea::setParent(ofxUIWidget *_parent)
 {
     parent = _parent;
     formatTextString();
-    label->setVisible(false);
-    paddedRect->height = rect->height+padding*2.0;
+    calculatePaddingRect();
 }
 
 void ofxUITextArea::setDrawShadow(bool _drawShadow)

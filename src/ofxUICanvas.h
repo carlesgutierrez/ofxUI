@@ -26,68 +26,31 @@
 
 #include "ofxUIWidget.h"
 #include "ofxUIDefines.h"
+#include "ofxUIEventArgs.h"
+#include "ofxUIWidgets.h"
+#include "ofxUISlider.h"
 #include <vector>
 #include <map>
-
-class ofxUIEventArgs; 
-class ofxUISpacer;
-class ofxUILabel;
-class ofxUIFPS;
-class ofxUISlider;
-class ofxUIIntSlider;
-class ofxUIRotarySlider;
-class ofxUIImageSlider;
-class ofxUINumberDialer;
-class ofxUIMinimalSlider;
-class ofxUIRangeSlider;
-class ofxUIFPSSlider;
-class ofxUIRadio;
-class ofxUIButton;
-class ofxUIToggle;
-class ofxUIToggleMatrix;
-class ofxUI2DPad;
-class ofxUITextInput;
-class ofxUILabelToggle;
-class ofxUILabelButton;
-class ofxUIDropDownList;
-class ofxUIWaveform;
-class ofxUISpectrum;
-class ofxUIMovingGraph;
-class ofxUIImage;
-class ofxUIBaseDraws;
-class ofxUIImageSampler;
-class ofxUIBiLabelSlider;
-class ofxUICircleSlider;
-class ofxUIValuePlotter;
-class ofxUI2DGraph;
-class ofxUIImageToggle;
-class ofxUIImageButton;
-class ofxUIMultiImageButton;
-class ofxUIMultiImageToggle;
-class ofxUITextArea;
-class ofxUISortableList;
 
 class ofxUICanvas : public ofxUIWidget, public ofxUIAppCBGlue
 {
 public:
     ~ofxUICanvas();
+    ofxUICanvas(float defaultWidthSize = OFX_UI_GLOBAL_CANVAS_WIDTH, float defaultHeightSize = OFX_UI_GLOBAL_CANVAS_WIDTH);
     ofxUICanvas(ofxUIRectangle r);
     ofxUICanvas(float x, float y, float w, float h);
     ofxUICanvas(float x, float y, float w, float h, ofxUICanvas *sharedResources);
-    ofxUICanvas(float defaultWidthSize = OFX_UI_GLOBAL_CANVAS_WIDTH, float defaultHeightSize = OFX_UI_GLOBAL_CANVAS_WIDTH);
     ofxUICanvas(ofxUICanvas *sharedResources, float defaultWidthSize = OFX_UI_GLOBAL_CANVAS_WIDTH, float defaultHeightSize = OFX_UI_GLOBAL_CANVAS_WIDTH);
     ofxUICanvas(string title);
     
-    void init(int w, int h, ofxUICanvas *sharedResources = NULL);
+    void init(int x, int y, int w, int h, ofxUICanvas *sharedResources = NULL);
     void copyCanvasStyle(ofxUICanvas *styler);
     void copyCanvasProperties(ofxUICanvas *styler);
 #ifndef OFX_UI_NO_XML
     virtual void saveSettings(string fileName);
-    virtual void writeSpecificWidgetData(ofxUIWidget *widget, ofxXmlSettings *XML);
+    virtual void loadSettings(string fileName);
     void setTriggerWidgetsUponLoad(bool _bTriggerWidgetsUponLoad);
     bool getTriggerWidgetsUponLoad();
-    virtual void loadSettings(string fileName);
-    virtual void loadSpecificWidgetData(ofxUIWidget *widget, ofxXmlSettings *XML);
 #endif
     ofxUIFont *getFontLarge();
     ofxUIFont *getFontMedium();
@@ -124,7 +87,7 @@ public:
     virtual void mouseReleased(int x, int y, int button);
     virtual void windowResized(int w, int h);
 #endif	
-
+	
     virtual void keyPressed(int key);
     virtual void keyReleased(int key);
     virtual bool isHit(int x, int y);
@@ -155,7 +118,7 @@ public:
     ofxUIWidget* addWidgetNorthOf(ofxUIWidget *widget, string referenceName, bool reAdd = false);
     ofxUIWidget* addWidgetWestOf(ofxUIWidget *widget, string referenceName, bool reAdd = false);
     ofxUIWidget* addWidgetEastOf(ofxUIWidget *widget, string referenceName, bool reAdd = false);
-
+	
     ofxUISpacer* addSpacer(float h = OFX_UI_GLOBAL_SPACING_HEIGHT);
     ofxUISpacer* addSpacer(string name, float h = OFX_UI_GLOBAL_SPACING_HEIGHT);
     ofxUISpacer* addSpacer(float w, float h);
@@ -175,6 +138,11 @@ public:
     ofxUIIntSlider* addIntSlider(string _name, int _min, int _max, int _value, float w, float h, float x = 0, float y = 0);
     ofxUIIntSlider* addIntSlider(string _name, int _min, int _max, int *_value);
     ofxUIIntSlider* addIntSlider(string _name, int _min, int _max, int *_value, float w, float h, float x = 0, float y = 0);
+	
+    ofxUIDoubleSlider* addDoubleSlider(string _name, double _min, double _max, double _value);
+    ofxUIDoubleSlider* addDoubleSlider(string _name, double _min, double _max, double _value, float w, float h, float x = 0, float y = 0);
+    ofxUIDoubleSlider* addDoubleSlider(string _name, double _min, double _max, double *_value);
+    ofxUIDoubleSlider* addDoubleSlider(string _name, double _min, double _max, double *_value, float w, float h, float x = 0, float y = 0);
     
     ofxUIRotarySlider* addRotarySlider(string _name, float _min, float _max, float _value, int _size = OFX_UI_FONT_SMALL);
     ofxUIRotarySlider* addRotarySlider(string _name, float _min, float _max, float _value, float w, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
@@ -193,7 +161,7 @@ public:
     ofxUIMinimalSlider* addMinimalSlider(string _name, float _min, float _max, float _value, float w, float h, float x = 0, float y = 0, int size = OFX_UI_FONT_SMALL);
     ofxUIMinimalSlider* addMinimalSlider(string _name, float _min, float _max, float *_value, int size = OFX_UI_FONT_SMALL);
     ofxUIMinimalSlider* addMinimalSlider(string _name, float _min, float _max, float *_value, float w, float h, float x = 0, float y = 0, int size = OFX_UI_FONT_SMALL);
-
+	
     ofxUIRangeSlider* addRangeSlider(string _name, float _min, float _max, float _valuelow, float _valuehigh);
     ofxUIRangeSlider* addRangeSlider(string _name, float _min, float _max, float _valuelow, float _valuehigh, float w, float h, float x = 0, float y = 0);
     ofxUIRangeSlider* addRangeSlider(string _name, float _min, float _max, float *_valuelow, float *_valuehigh);
@@ -217,7 +185,7 @@ public:
     
     ofxUIToggleMatrix* addToggleMatrix(string _name, int _rows, int _cols);
     ofxUIToggleMatrix* addToggleMatrix(string _name, int _rows, int _cols, float w, float h);
-
+	
     ofxUI2DPad* add2DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f _value);
     ofxUI2DPad* add2DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f _value, float w, float h, float x = 0, float y = 0);
     ofxUI2DPad* add2DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f *_value);
@@ -230,15 +198,15 @@ public:
     ofxUILabelToggle* addLabelToggle(string _name, bool _value, float w, float h = 0, float x = 0, float y = 0, bool _justifyLeft = false);
     ofxUILabelToggle* addLabelToggle(string _name, bool *_value, bool _justifyLeft = false);
     ofxUILabelToggle* addLabelToggle(string _name, bool *_value, float w, float h = 0, float x = 0, float y = 0, bool _justifyLeft = false);
-
+	
     ofxUILabelButton* addLabelButton(string _name, bool _value, bool _justifyLeft = false);
     ofxUILabelButton* addLabelButton(string _name, bool _value, float w, float h = 0, float x = 0, float y = 0, bool _justifyLeft = false);
     ofxUILabelButton* addLabelButton(string _name, bool *_value, bool _justifyLeft = false);
     ofxUILabelButton* addLabelButton(string _name, bool *_value, float w, float h = 0, float x = 0, float y = 0, bool _justifyLeft = false);
-
+	
     ofxUIDropDownList* addDropDownList(string _name, vector<string> items);
     ofxUIDropDownList* addDropDownList(string _name, vector<string> items, float w, float x = 0, float y = 0);
-
+	
     ofxUIWaveform* addWaveform(string _name, float *_buffer, int _bufferSize, float _min = -1.0, float _max = 1.0, float _h = OFX_UI_GLOBAL_GRAPH_HEIGHT);
     ofxUIWaveform* addWaveform(string _name, float *_buffer, int _bufferSize, float _min, float _max, float _w, float _h);
     
@@ -247,13 +215,13 @@ public:
     
     ofxUIMovingGraph* addMovingGraph(string _name, vector<float> _buffer, int _bufferSize, float _min, float _max, float _h = OFX_UI_GLOBAL_GRAPH_HEIGHT);
     ofxUIMovingGraph* addMovingGraph(string _name, vector<float> _buffer, int _bufferSize, float _min, float _max, float _w, float _h);
-
+	
     ofxUIImage *addImage(string _name, ofImage *_image, float _w, float _h, bool _showLabel = false);
     ofxUIImage *addImage(string _name, ofImage *_image, bool _showLabel = false);
-
+	
     ofxUIBaseDraws *addBaseDraws(string _name, ofBaseDraws *_base, float _w, float _h, bool _showLabel = false);
     ofxUIBaseDraws *addBaseDraws(string _name, ofBaseDraws *_base, bool _showLabel = false);
-
+	
     ofxUIImageSampler *addImageSampler(string _name, ofImage *_image, float _w, float _h);
     ofxUIImageSampler *addImageSampler(string _name, ofImage *_image);
     
@@ -266,18 +234,18 @@ public:
     ofxUICircleSlider* addCircleSlider(string _name, float _min, float _max, float _value, float w, float x = 0, float y = 0);
     ofxUICircleSlider* addCircleSlider(string _name, float _min, float _max, float *_value);
     ofxUICircleSlider* addCircleSlider(string _name, float _min, float _max, float *_value, float w, float x = 0, float y = 0);
-
+	
     ofxUIValuePlotter* addValuePlotter(string _name, int _bufferSize, float _min, float _max, float *_value, float _h = OFX_UI_GLOBAL_GRAPH_HEIGHT);
     ofxUIValuePlotter* addValuePlotter(string _name, int _bufferSize, float _min, float _max, float *_value, float _w, float _h);
     
     ofxUI2DGraph *add2DGraph(string _name, ofxUIVec2f _rangeX, ofxUIVec2f _rangeY, int _bufferSize, float * _xValues, float * _yValues);
     ofxUI2DGraph *add2DGraph(string _name, ofxUIVec2f _rangeX, ofxUIVec2f _rangeY, int _bufferSize, float * _xValues, float * _yValues, float _w, float _h, float _x = 0, float _y = 0);
-
+	
     ofxUIImageToggle *addImageToggle(string _name, string _path, bool *_value, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
     ofxUIImageToggle *addImageToggle(string _name, string _path, bool _value, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
     ofxUIImageToggle *addImageToggle(string _name, string _path, bool *_value, int _size = OFX_UI_FONT_SMALL);
     ofxUIImageToggle *addImageToggle(string _name, string _path, bool _value, int _size = OFX_UI_FONT_SMALL);
-
+	
     ofxUIImageButton *addImageButton(string _name, string _path, bool *_value, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
     ofxUIImageButton *addImageButton(string _name, string _path, bool _value, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
     ofxUIImageButton *addImageButton(string _name, string _path, bool *_value, int _size = OFX_UI_FONT_SMALL);
@@ -346,13 +314,13 @@ public:
     vector<ofxUIWidget*> getWidgets();
     vector<ofxUIWidget*> getWidgetsOfType(ofxUIWidgetType type);
 	ofEvent<ofxUIEventArgs> newGUIEvent;
-
+	
 protected:
     void pushbackWidget(ofxUIWidget *widget, bool addWidgetToFront = false);
     //Easy Font setting contributed from Colin Duffy (colin@tomorrowevening.com)
     bool updateFont(ofxUIWidgetFontType _kind, string filename, int fontsize, bool _bAntiAliased=true, bool _bFullCharacterSet=false, bool makeContours=false, float simplifyAmt=0.3, int dpi=0);
     void checkForKeyFocus(ofxUIWidget *child);
-
+	
 	ofxUIFont *font_large;
 	ofxUIFont *font_medium; 		
 	ofxUIFont *font_small;
@@ -385,7 +353,7 @@ protected:
     float globalSpacerHeight;
     
     string fontName;
-
+	
     ofxUIWidgetPosition widgetPosition;
     ofxUIWidgetAlignment widgetAlign;
     ofxUIWidgetFontType widgetFontSize;

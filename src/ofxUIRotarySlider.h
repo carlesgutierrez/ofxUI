@@ -35,7 +35,7 @@ public:
     ofxUIRotarySlider(float x, float y, float w, float _min, float _max, float *_value, string _name, int _size = OFX_UI_FONT_SMALL);
     ofxUIRotarySlider(float w, float _min, float _max, float *_value, string _name, int _size = OFX_UI_FONT_SMALL);
     ~ofxUIRotarySlider();
-    void init(float w, float _min, float _max, float *_value, string _name, int _size = OFX_UI_FONT_SMALL);
+    void init(float x, float y, float w, float _min, float _max, float *_value, string _name, int _size = OFX_UI_FONT_SMALL);
     virtual void update();
     virtual void setDrawPadding(bool _draw_padded_rect);
     virtual void setDrawPaddingOutline(bool _draw_padded_rect_outline);
@@ -55,11 +55,10 @@ public:
     void updateValueRef();
 	void updateLabel();
     void stateChange();
-    void setVisible(bool _visible);
 	void setValue(float _value);
 	float getValue();
+    float getNormalizedValue();
 	float getScaledValue();
-	ofxUILabel *getLabel();
 	void setParent(ofxUIWidget *_parent);
     bool isDraggable();
     void setMax(float _max);
@@ -69,6 +68,11 @@ public:
     ofVec2f getMaxAndMind();
     void setMaxAndMin(float _max, float _min);
     virtual bool isHit(float x, float y);
+    bool hasState(){ return true; };
+#ifndef OFX_UI_NO_XML
+    virtual void saveState(ofxXmlSettings *XML);
+    virtual void loadState(ofxXmlSettings *XML);
+#endif    
     
 protected:    
 	float value, increment; 
@@ -78,6 +82,8 @@ protected:
     ofxUIVec2f center; 
     ofxUIVec2f hitPoint; 
     ofxUIVec2f homePoint; 
-    float outerRadius, innerRadius; 
+    float outerRadius, innerRadius;
+    string valueString; 
+    
     
 }; 

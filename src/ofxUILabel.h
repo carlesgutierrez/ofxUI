@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "ofxUIWidgetWithLabel.h"
+#include "ofxUIWidget.h"
 
 class ofxUILabel : public ofxUIWidget
 {
@@ -40,7 +40,7 @@ public:
     ofxUILabel(float w, string _name, int _size);
     ofxUILabel(float w, string _name, int _size, float h);
     
-    void init(string _name, string _label, int _size);
+    void init(float x, float y, float w, float h, string _name, string _label, int _size);
     
     void drawBack();
     void drawFill();
@@ -68,6 +68,10 @@ public:
 	
     void focus();
 	void unfocus();
+    
+    void setVisible(bool _visible);
+    bool isVisible();
+    void toggleVisible();
     
 protected:    
 	int size;

@@ -31,14 +31,6 @@ class ofxUI2DPad : public ofxUIWidgetWithLabel
 public:
     ofxUI2DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f _value, float w, float h, float x = 0, float y = 0);
     ofxUI2DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f *_value, float w, float h, float x = 0, float y = 0);
-    ofxUI2DPad(float x, float y, float w, float h, ofxUIVec3f _value, string _name);
-    ofxUI2DPad(float x, float y, float w, float h, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f _value, string _name);
-    ofxUI2DPad(float w, float h, ofxUIVec3f _value, string _name);
-    ofxUI2DPad(float w, float h, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f _value, string _name);
-    ofxUI2DPad(float x, float y, float w, float h, ofxUIVec3f *_value, string _name);
-    ofxUI2DPad(float x, float y, float w, float h, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f *_value, string _name);
-    ofxUI2DPad(float w, float h, ofxUIVec3f *_value, string _name);
-    ofxUI2DPad(float w, float h, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f *_value, string _name);
     ~ofxUI2DPad();
     void init(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f *_value, float w, float h, float x = 0, float y = 0);
     virtual void update();
@@ -53,21 +45,21 @@ public:
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
     void keyPressed(int key);
-    void keyReleased(int key);
-    void windowResized(int w, int h);
 	void input(float x, float y);
     void updateValueRef();
 	void updateLabel();
     void stateChange();
-    void setVisible(bool _visible);
 	void setValue(ofxUIVec3f _value);
 	ofxUIVec3f getValue();
 	ofxUIVec3f getPercentValue();
 	ofxUIVec3f getScaledValue();
-	ofxUILabel *getLabel();
-	void setParent(ofxUIWidget *_parent);
     bool isDraggable();
     void setLabelPrecision(int _precision);
+    bool hasState(){ return true; };
+#ifndef OFX_UI_NO_XML
+    virtual void saveState(ofxXmlSettings *XML);
+    virtual void loadState(ofxXmlSettings *XML);
+#endif
 
 protected:
 	ofxUIVec3f value;

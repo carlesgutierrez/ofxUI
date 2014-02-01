@@ -33,17 +33,13 @@ public:
     ofxUIBaseDraws(float x, float y, float w, float h, ofBaseDraws* _image, string _name, bool _showLabel);
     ofxUIBaseDraws(float w, float h, ofBaseDraws* _image, string _name);
     ofxUIBaseDraws(float w, float h, ofBaseDraws* _image, string _name, bool _showLabel);
-    void init(float w, float h, ofBaseDraws* _image, string _name);
+    void init(float x, float y, float w, float h, ofBaseDraws* _image, string _name);
     virtual void setDrawPadding(bool _draw_padded_rect);
     virtual void setDrawPaddingOutline(bool _draw_padded_rect_outline);
     virtual void drawFill();
-    virtual void setVisible(bool _visible);
-	ofxUILabel *getLabel();
     void set(ofBaseDraws *_image);
-	virtual void setParent(ofxUIWidget *_parent);
     virtual bool isDraggable();
     
 protected:
-	ofBaseDraws *image; 
-    bool showLabel; 
+	ofBaseDraws *image;
 }; 

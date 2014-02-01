@@ -28,6 +28,8 @@
 ofxUIWidget::ofxUIWidget()
 {
     parent = NULL;
+    rect = NULL;
+    paddedRect = NULL; 
     name = string("base");
     ID = -1;
     hit = false;
@@ -69,6 +71,44 @@ ofxUIWidget::~ofxUIWidget()
     {
         delete paddedRect;
     }
+}
+
+void ofxUIWidget::initRect(float x, float y, float w, float h)
+{
+    if(rect != NULL)
+    {
+        delete rect;
+    }
+    rect = new ofxUIRectangle(x,y,w,h);
+    initPaddingRect();
+}
+
+void ofxUIWidget::initPaddingRect()
+{
+    if(paddedRect != NULL)
+    {
+        delete paddedRect;
+    }
+    paddedRect = new ofxUIRectangle(-padding, -padding, rect->getWidth()+padding*2.0, rect->getHeight()+padding*2.0);
+    paddedRect->setParent(rect);
+    calculatePaddingRect();
+}
+
+void ofxUIWidget::calculatePaddingRect()
+{
+    float xMax = rect->getWidth();
+    float yMax = rect->getHeight();
+    
+    for(vector<ofxUIWidget *>::iterator it = embeddedWidgets.begin(); it != embeddedWidgets.end(); ++it)
+    {
+        if((*it)->isVisible())
+        {
+            ofxUIRectangle *r = (*it)->getRect();
+            r->getMaxX() > xMax ? (xMax = r->getMaxX()) : NULL;
+            r->getMaxY() > yMax ? (yMax = r->getMaxY()) : NULL;
+        }
+    }
+    paddedRect->set(-padding, -padding, xMax+padding*2.0, yMax+padding*2.0);
 }
 
 void ofxUIWidget::update()
@@ -438,7 +478,7 @@ void ofxUIWidget::triggerSelf()
 void ofxUIWidget::setPadding(float _padding)
 {
     padding = _padding;
-    paddedRect->set(-padding, -padding, rect->getWidth()+padding*2.0, rect->getHeight()+padding*2.0);
+    calculatePaddingRect();
 }
 
 float ofxUIWidget::getPadding()
@@ -481,14 +521,49 @@ int ofxUIWidget::getID()
     return ID;
 }
 
+//void ofxUIWidget::positionWidget(ofxUIWidget *widget)
+//{
+//    widget->getRect()->setX(0);
+//    widget->getRect()->setY(0);
+//    calculatePaddingRect();
+//}
+//
+//void ofxUIWidget::positionWidgetDown(ofxUIWidget *widget)
+//{
+//    widget->getRect()->setX(0);
+//    widget->getRect()->setY(rect->getHeight()+padding);
+//    calculatePaddingRect();
+//}
+//
+//void ofxUIWidget::positionWidgetUp(ofxUIWidget *widget)
+//{
+//    widget->getRect()->setX(0);
+//    widget->getRect()->setY(-widget->getRect()->getHeight()-padding);
+//    calculatePaddingRect();
+//}
+//
+//void ofxUIWidget::positionWidgetLeft(ofxUIWidget *widget)
+//{
+//    widget->getRect()->setX(-widget->getRect()->getWidth()-padding);
+//    widget->getRect()->setY(0);
+//    calculatePaddingRect();
+//}
+//
+//void ofxUIWidget::positionWidgetRight(ofxUIWidget *widget)
+//{
+//    widget->getRect()->setX(rect->getWidth()+padding);
+//    widget->getRect()->setY(0);
+//    calculatePaddingRect();
+//}
+
 void ofxUIWidget::addWidget(ofxUIWidget *widget)
 {
-    //Experimental
+
 }
 
 void ofxUIWidget::removeWidget(ofxUIWidget *widget)
 {
-    //Experimental
+    
 }
 
 bool ofxUIWidget::hasLabel()
@@ -562,7 +637,7 @@ ofxUIWidget *ofxUIWidget::getCanvasParent()
     while (notFoundParentCanvas)
     {
         int kind = parent->getKind();
-        if( kind == OFX_UI_WIDGET_CANVAS || kind == OFX_UI_WIDGET_SCROLLABLECANVAS || kind == OFX_UI_WIDGET_SUPERCANVAS )
+        if( kind == OFX_UI_WIDGET_CANVAS || kind == OFX_UI_WIDGET_SCROLLABLECANVAS || kind == OFX_UI_WIDGET_SUPERCANVAS || OFX_UI_WIDGET_TABBAR)
         {
             notFoundParentCanvas = false;
             return parent;
@@ -570,6 +645,30 @@ ofxUIWidget *ofxUIWidget::getCanvasParent()
         else
         {
             parent = parent->getParent();
+            if(parent == NULL)
+            {
+                return NULL; 
+            }
         }
     }
+    return NULL; 
 }
+
+bool ofxUIWidget::hasState()
+{
+    return false;
+}
+
+#ifndef OFX_UI_NO_XML
+
+void ofxUIWidget::saveState(ofxXmlSettings *XML)
+{
+    
+}
+
+void ofxUIWidget::loadState(ofxXmlSettings *XML)
+{
+    
+}
+
+#endif

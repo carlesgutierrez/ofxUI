@@ -683,14 +683,16 @@ void ofxUIScrollableSliderCanvas::updateScrollBarSize(vector<ofxUIWidget*> _auxw
 }
 
 //--------------------------------------------------------------
-void ofxUIScrollableSliderCanvas::updateScrollPosition(){
+void ofxUIScrollableSliderCanvas::updateScrollPosition(int max){
 	if(scrollY){
 		
 		vector<ofxUIWidget*> auxwidgets = getWidgets();
 		ofVec2f maxims = calcHeightContends(auxwidgets); 
 		int sizeHContend = maxims.y;// y is heigh, x is width
 		
-		float posmap = ofxUIMap(posScrollbar, 0, 1, 100, -sizeHContend-100, true); 
+		float fixybottompos = ofxUIMap(posScrollbar, 0, 1, 0, -sizeHContend*0.5, true); 
+		
+		float posmap = ofxUIMap(posScrollbar, 0, 1, 0, -sizeHContend+max, true); 
 		
 		//finally move the canvas to direct pos finded between the maximum and minimum
 		rect->y = posmap;		
@@ -723,7 +725,7 @@ void ofxUIScrollableSliderCanvas::guiEvent(ofxUIEventArgs &e)
 		ofxUIScrollSlider* scrollSlider =  (ofxUIScrollSlider *)e.widget;
 		float mapvalscroll = scrollSlider->getPosScrollBar();
 		setMappedScrollPos(mapvalscroll);
-		updateScrollPosition();		
+		updateScrollPosition(scrollSlider->getMax());		
 	}
 }
 

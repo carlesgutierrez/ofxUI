@@ -25,55 +25,28 @@
 #include "ofxUISlider.h"
 #include "ofxUI.h"
 
-ofxUISlider::ofxUISlider() : ofxUIWidgetWithLabel()
+template<typename T>
+ofxUISlider_<T>::ofxUISlider_() : ofxUIWidgetWithLabel()
 {
     
 }
 
-ofxUISlider::ofxUISlider(string _name, float _min, float _max, float _value, float w, float h, float x, float y) : ofxUIWidgetWithLabel()
+template<typename T>
+ofxUISlider_<T>::ofxUISlider_(string _name, T _min, T _max, T _value, float w, float h, float x, float y) : ofxUIWidgetWithLabel()
 {
     useReference = false;
     init(_name, _min, _max, &_value, w, h, x, y);
 }
 
-ofxUISlider::ofxUISlider(string _name, float _min, float _max, float *_value, float w, float h, float x, float y) : ofxUIWidgetWithLabel()
+template<typename T>
+ofxUISlider_<T>::ofxUISlider_(string _name, T _min, T _max, T *_value, float w, float h, float x, float y) : ofxUIWidgetWithLabel()
 {
     useReference = true;
     init(_name, _min, _max, _value, w, h, x, y);
 }
 
-// DON'T USE THE NEXT CONSTRUCTORS
-// This is maintained for backward compatibility and will be removed on future releases
-
-ofxUISlider::ofxUISlider(float x, float y, float w, float h, float _min, float _max, float _value, string _name) : ofxUIWidgetWithLabel()
-{
-    useReference = false;
-    init(_name, _min, _max, &_value, w, h, x, y);
-    //        ofLogWarning("OFXUISLIDER: DON'T USE THIS CONSTRUCTOR. THIS WILL BE REMOVED ON FUTURE RELEASES.");
-}
-
-ofxUISlider::ofxUISlider(float w, float h, float _min, float _max, float _value, string _name) : ofxUIWidgetWithLabel()
-{
-    useReference = false;
-    init(_name, _min, _max, &_value, w, h, 0, 0);
-    //        ofLogWarning("OFXUISLIDER: DON'T USE THIS CONSTRUCTOR. THIS WILL BE REMOVED ON FUTURE RELEASES.");
-}
-
-ofxUISlider::ofxUISlider(float x, float y, float w, float h, float _min, float _max, float *_value, string _name) : ofxUIWidgetWithLabel()
-{
-    useReference = true;
-    init(_name, _min, _max, _value, w, h, x, y);
-    //        ofLogWarning("OFXUISLIDER: DON'T USE THIS CONSTRUCTOR. THIS WILL BE REMOVED ON FUTURE RELEASES.");
-}
-
-ofxUISlider::ofxUISlider(float w, float h, float _min, float _max, float *_value, string _name) : ofxUIWidgetWithLabel()
-{
-    useReference = true;
-    init(_name, _min, _max, _value, w, h, 0, 0);
-    //        ofLogWarning("OFXUISLIDER: DON'T USE THIS CONSTRUCTOR. THIS WILL BE REMOVED ON FUTURE RELEASES.");
-}
-
-ofxUISlider::~ofxUISlider()
+template<typename T>
+ofxUISlider_<T>::~ofxUISlider_()
 {
     if(!useReference)
     {
@@ -81,21 +54,13 @@ ofxUISlider::~ofxUISlider()
     }
 }
 
-void ofxUISlider::init(string _name, float _min, float _max, float *_value, float w, float h, float x, float y)
+template<typename T>
+void ofxUISlider_<T>::init(string _name, T _min, T _max, T *_value, float w, float h, float x, float y)
 {
-    rect = new ofxUIRectangle(x,y,w,h);
+    initRect(x,y,w,h);
     name = string(_name);
-    if(w > h)
-    {
-        kind = OFX_UI_WIDGET_SLIDER_H;
-    }
-    else
-    {
-        kind = OFX_UI_WIDGET_SLIDER_V;
-    }
-    
-    paddedRect = new ofxUIRectangle(-padding, -padding, w+padding*2.0, h+padding);
-    paddedRect->setParent(rect);
+    setOrientation(w, h);
+    setKind();
     
     draw_fill = true;
     
@@ -106,7 +71,7 @@ void ofxUISlider::init(string _name, float _min, float _max, float *_value, floa
     }
     else
     {
-        valueRef = new float();
+        valueRef = new T();
         *valueRef = value;
     }
     
@@ -123,9 +88,10 @@ void ofxUISlider::init(string _name, float _min, float _max, float *_value, floa
         value = min;
     }
     
-    value = ofxUIMap(value, min, max, 0.0, 1.0, true);
+    value = ofxUIMap(value, min, max, 0.0, 1.0, true);    
+    valueString = ofxUIToString(getScaledValue(),labelPrecision);
     
-    if(kind == OFX_UI_WIDGET_SLIDER_H)
+    if(orientation == OFX_UI_ORIENTATION_HORIZONTAL)
     {
         label = new ofxUILabel(0,h+padding,string(name+" LABEL"), string(name + ": " + ofxUIToString(max,labelPrecision)), OFX_UI_FONT_SMALL);
     }
@@ -133,26 +99,81 @@ void ofxUISlider::init(string _name, float _min, float _max, float *_value, floa
     {
         label = new ofxUILabel(0,h+padding,string(name+" LABEL"), string(name), OFX_UI_FONT_SMALL);
     }
+    addEmbeddedWidget(label);
+    label->setVisible(drawLabel);
     
-    label->setParent(label);
-    label->setRectParent(rect);
-    label->setEmbedded(true);
     increment = fabs(max - min) / 100.0;
     bRoundedToNearestInt = false;
     bClampValue = true;
 }
 
-bool ofxUISlider::getSetClampValue()
+template<typename T>
+void ofxUISlider_<T>::setOrientation(float w, float h)
+{
+    if(w > h)
+    {
+        orientation = OFX_UI_ORIENTATION_HORIZONTAL;
+    }
+    else
+    {
+        orientation = OFX_UI_ORIENTATION_VERTICAL;
+    }
+}
+
+template<>
+void ofxUISlider_<float>::setKind()
+{
+    if(orientation == OFX_UI_ORIENTATION_HORIZONTAL)
+    {
+        kind = OFX_UI_WIDGET_SLIDER_H;
+    }
+    else
+    {
+        kind = OFX_UI_WIDGET_SLIDER_V;
+    }
+}
+
+template<>
+void ofxUISlider_<int>::setKind()
+{
+    if(orientation == OFX_UI_ORIENTATION_HORIZONTAL)
+    {
+        kind = OFX_UI_WIDGET_INTSLIDER_H;
+    }
+    else
+    {
+        kind = OFX_UI_WIDGET_INTSLIDER_V;
+    }
+}
+
+
+template<>
+void ofxUISlider_<double>::setKind()
+{
+    if(orientation == OFX_UI_ORIENTATION_HORIZONTAL)
+    {
+        kind = OFX_UI_WIDGET_DOUBLESLIDER_H;
+    }
+    else
+    {
+        kind = OFX_UI_WIDGET_DOUBLESLIDER_V;
+    }
+}
+
+template<typename T>
+bool ofxUISlider_<T>::getSetClampValue()
 {
     return bClampValue;
 }
 
-void ofxUISlider::setClampValue(bool _bClampValue)
+template<typename T>
+void ofxUISlider_<T>::setClampValue(bool _bClampValue)
 {
     bClampValue = _bClampValue;
 }
 
-void ofxUISlider::update()
+template<typename T>
+void ofxUISlider_<T>::update()
 {
     if(useReference)
     {
@@ -161,19 +182,22 @@ void ofxUISlider::update()
     }
 }
 
-void ofxUISlider::setDrawPadding(bool _draw_padded_rect)
+template<typename T>
+void ofxUISlider_<T>::setDrawPadding(bool _draw_padded_rect)
 {
     draw_padded_rect = _draw_padded_rect;
     label->setDrawPadding(false);
 }
 
-void ofxUISlider::setDrawPaddingOutline(bool _draw_padded_rect_outline)
+template<typename T>
+void ofxUISlider_<T>::setDrawPaddingOutline(bool _draw_padded_rect_outline)
 {
     draw_padded_rect_outline = _draw_padded_rect_outline;
     label->setDrawPaddingOutline(false);
 }
 
-void ofxUISlider::drawBack()
+template<typename T>
+void ofxUISlider_<T>::drawBack()
 {
     if(draw_back)
     {
@@ -183,7 +207,8 @@ void ofxUISlider::drawBack()
     }
 }
 
-void ofxUISlider::drawOutline()
+template<typename T>
+void ofxUISlider_<T>::drawOutline()
 {
     if(draw_outline)
     {
@@ -193,7 +218,8 @@ void ofxUISlider::drawOutline()
     }
 }
 
-void ofxUISlider::drawOutlineHighlight()
+template<typename T>
+void ofxUISlider_<T>::drawOutlineHighlight()
 {
     if(draw_outline_highlight)
     {
@@ -203,13 +229,14 @@ void ofxUISlider::drawOutlineHighlight()
     }
 }
 
-void ofxUISlider::drawFill()
+template<typename T>
+void ofxUISlider_<T>::drawFill()
 {
     if(draw_fill && value > 0.0)
     {
         ofxUIFill();
         ofxUISetColor(color_fill);
-        if(kind == OFX_UI_WIDGET_SLIDER_H)
+        if(orientation == OFX_UI_ORIENTATION_HORIZONTAL)
         {
             ofxUIDrawRect(rect->getX(), rect->getY(), rect->getWidth()*MIN(MAX(value, 0.0), 1.0), rect->getHeight());
         }
@@ -220,13 +247,14 @@ void ofxUISlider::drawFill()
     }
 }
 
-void ofxUISlider::drawFillHighlight()
+template<typename T>
+void ofxUISlider_<T>::drawFillHighlight()
 {
     if(draw_fill_highlight)
     {
         ofxUIFill();
         ofxUISetColor(color_fill_highlight);
-        if(kind == OFX_UI_WIDGET_SLIDER_H)
+        if(orientation == OFX_UI_ORIENTATION_HORIZONTAL)
         {
             ofxUIDrawRect(rect->getX(), rect->getY(), rect->getWidth()*MIN(MAX(value, 0.0), 1.0), rect->getHeight());
         }
@@ -236,12 +264,13 @@ void ofxUISlider::drawFillHighlight()
         }
         if(kind == OFX_UI_WIDGET_SLIDER_V)
         {
-            label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*MIN(MAX(value, 0.0), 1.0), ofxUIToString(getScaledValue(),labelPrecision));
+            label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*MIN(MAX(value, 0.0), 1.0), valueString);
         }
     }
 }
 
-void ofxUISlider::mouseMoved(int x, int y )
+template<typename T>
+void ofxUISlider_<T>::mouseMoved(int x, int y )
 {
     if(rect->inside(x, y))
     {
@@ -254,7 +283,8 @@ void ofxUISlider::mouseMoved(int x, int y )
     stateChange();
 }
 
-void ofxUISlider::mouseDragged(int x, int y, int button)
+template<typename T>
+void ofxUISlider_<T>::mouseDragged(int x, int y, int button)
 {
     if(hit)
     {
@@ -269,7 +299,8 @@ void ofxUISlider::mouseDragged(int x, int y, int button)
     stateChange();
 }
 
-void ofxUISlider::mousePressed(int x, int y, int button)
+template<typename T>
+void ofxUISlider_<T>::mousePressed(int x, int y, int button)
 {
     if(rect->inside(x, y))
     {
@@ -285,11 +316,12 @@ void ofxUISlider::mousePressed(int x, int y, int button)
     stateChange();
 }
 
-void ofxUISlider::mouseReleased(int x, int y, int button)
+template<typename T>
+void ofxUISlider_<T>::mouseReleased(int x, int y, int button)
 {
     if(hit)
     {
-#ifdef TARGET_OPENGLES
+#ifdef OFX_UI_TARGET_TOUCH
         state = OFX_UI_STATE_NORMAL;
 #else
         state = OFX_UI_STATE_OVER;
@@ -305,7 +337,8 @@ void ofxUISlider::mouseReleased(int x, int y, int button)
     hit = false;
 }
 
-void ofxUISlider::keyPressed(int key)
+template<typename T>
+void ofxUISlider_<T>::keyPressed(int key)
 {
     if(state == OFX_UI_STATE_OVER || state == OFX_UI_STATE_DOWN)
     {
@@ -344,29 +377,34 @@ void ofxUISlider::keyPressed(int key)
     }
 }
 
-void ofxUISlider::keyReleased(int key)
+template<typename T>
+void ofxUISlider_<T>::keyReleased(int key)
 {
     bRoundedToNearestInt = false;
 }
 
-void ofxUISlider::windowResized(int w, int h)
+template<typename T>
+void ofxUISlider_<T>::windowResized(int w, int h)
 {
     
 }
 
-float ofxUISlider::getIncrement()
+template<typename T>
+T ofxUISlider_<T>::getIncrement()
 {
     return increment;
 }
 
-void ofxUISlider::setIncrement(float _increment)
+template<typename T>
+void ofxUISlider_<T>::setIncrement(T _increment)
 {
     increment = _increment;
 }
 
-void ofxUISlider::input(float x, float y)
+template<typename T>
+void ofxUISlider_<T>::input(float x, float y)
 {
-    if(kind == OFX_UI_WIDGET_SLIDER_H)
+    if(orientation == OFX_UI_ORIENTATION_HORIZONTAL)
     {
         value = rect->percentInside(x, y).x;
     }
@@ -375,33 +413,29 @@ void ofxUISlider::input(float x, float y)
         value = 1.0-rect->percentInside(x, y).y;
     }
     
-    if(value > 1.0)
-    {
-        value = 1.0;
-    }
-    else if(value < 0.0)
-    {
-        value = 0.0;
-    }
-    
+    value = MIN(1.0, MAX(0.0, value));
     updateValueRef();
     updateLabel();
 }
 
-void ofxUISlider::updateValueRef()
+template<typename T>
+void ofxUISlider_<T>::updateValueRef()
 {
     (*valueRef) = bRoundedToNearestInt ? ceil(getScaledValue()) : getScaledValue();
 }
 
-void ofxUISlider::updateLabel()
+template<typename T>
+void ofxUISlider_<T>::updateLabel()
 {
-    if(kind == OFX_UI_WIDGET_SLIDER_H)
+    valueString = ofxUIToString(getValue(),labelPrecision);
+    if(orientation == OFX_UI_ORIENTATION_HORIZONTAL)
     {
-        label->setLabel(name + ": " + ofxUIToString(getScaledValue(),labelPrecision));
+        label->setLabel(name + ": " + valueString);
     }
 }
 
-void ofxUISlider::stateChange()
+template<typename T>
+void ofxUISlider_<T>::stateChange()
 {
     switch (state) {
         case OFX_UI_STATE_NORMAL:
@@ -438,92 +472,88 @@ void ofxUISlider::stateChange()
     }
 }
 
-void ofxUISlider::setValue(float _value)
+template<typename T>
+void ofxUISlider_<T>::setValue(T _value)
 {
     value = ofxUIMap(_value, min, max, 0.0, 1.0, bClampValue);
     updateValueRef();
     updateLabel();
 }
 
-float ofxUISlider::getValue()
+template<typename T>
+T ofxUISlider_<T>::getValue()
+{
+    return (*valueRef);
+}
+
+template<typename T>
+T ofxUISlider_<T>::getNormalizedValue()
 {
     return value;
 }
 
-float ofxUISlider::getPercentValue()
+template<typename T>
+float ofxUISlider_<T>::getPercentValue()
 {
     return value;
 }
 
-float ofxUISlider::getScaledValue()
+template<typename T>
+T ofxUISlider_<T>::getScaledValue()
 {
     return ofxUIMap(value, 0.0, 1.0, min, max, bClampValue);
 }
 
-ofxUILabel *ofxUISlider::getLabel()
-{
-    return label;
-}
-
-void ofxUISlider::setLabelVisible(bool _labelVisible)
-{
-    label->setVisible(_labelVisible);
-    paddedRect->height -= label->getPaddingRect()->height;
-}
-
-void ofxUISlider::setVisible(bool _visible)
-{
-    visible = _visible;
-    label->setVisible(visible);
-}
-
-void ofxUISlider::setParent(ofxUIWidget *_parent)
+template<typename T>
+void ofxUISlider_<T>::setParent(ofxUIWidget *_parent)
 {
     parent = _parent;
     label->getRect()->setY(rect->getHeight()+padding);
-    paddedRect->height = rect->getHeight() + label->getPaddingRect()->height + padding;
-    paddedRect->x = -padding;
-    paddedRect->y = -padding;
-    if(label->getPaddingRect()->width > paddedRect->width)
-    {
-        paddedRect->width = label->getPaddingRect()->width;
-    }
+    calculatePaddingRect();
     updateValueRef();
     updateLabel();
 }
 
-void ofxUISlider::setLabelPrecision(int _precision) {
+template<typename T>
+void ofxUISlider_<T>::setLabelPrecision(int _precision)
+{
     labelPrecision = _precision;
     updateValueRef();
     updateLabel();
 }
 
-void ofxUISlider::setMax(float _max, bool bKeepValueTheSame)
+template<typename T>
+void ofxUISlider_<T>::setMax(T _max, bool bKeepValueTheSame)
 {
     setMaxAndMin(_max, min, bKeepValueTheSame);
 }
 
-float ofxUISlider::getMax()
+template<typename T>
+T ofxUISlider_<T>::getMax()
 {
     return max;
 }
 
-void ofxUISlider::setMin(float _min, bool bKeepValueTheSame)
+template<typename T>
+void ofxUISlider_<T>::setMin(T _min, bool bKeepValueTheSame)
 {
     setMaxAndMin(max, _min, bKeepValueTheSame);
 }
 
-float ofxUISlider::getMin()
+template<typename T>
+T ofxUISlider_<T>::getMin()
 {
     return min;
 }
 
-ofxUIVec2f ofxUISlider::getMaxAndMin()
+template<typename T>
+ofxUIVec2f ofxUISlider_<T>::getMaxAndMin()
 {
     return ofxUIVec2f(max, min);
 }
 
-void ofxUISlider::setMaxAndMin(float _max, float _min, bool bKeepValueTheSame)
+template<typename T>
+void ofxUISlider_<T>::setMaxAndMin(T _max, T _min, bool bKeepValueTheSame)
 {
     max = _max;
     min = _min;
@@ -537,7 +567,29 @@ void ofxUISlider::setMaxAndMin(float _max, float _min, bool bKeepValueTheSame)
     }
 }
 
-bool ofxUISlider::isDraggable()
+template<typename T>
+bool ofxUISlider_<T>::isDraggable()
 {
     return true;
 }
+
+#ifndef OFX_UI_NO_XML
+
+template<typename T>
+void ofxUISlider_<T>::saveState(ofxXmlSettings *XML)
+{
+    XML->setValue("Value", getValue(), 0);
+}
+
+template<typename T>
+void ofxUISlider_<T>::loadState(ofxXmlSettings *XML)
+{
+    T value = XML->getValue("Value", getValue(), 0);
+    setValue(value);
+}
+
+#endif
+
+template class ofxUISlider_<int>;
+template class ofxUISlider_<float>;
+template class ofxUISlider_<double>;

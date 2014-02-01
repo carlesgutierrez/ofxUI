@@ -79,7 +79,7 @@ ofxUIRangeSlider::~ofxUIRangeSlider()
 void ofxUIRangeSlider::init(string _name, float _min, float _max, float *_valuelow, float *_valuehigh, float w, float h,
           float x, float y, int _size)
 {
-    rect = new ofxUIRectangle(x,y,w,h);
+    initRect(x,y,w,h);
     name = string(_name);
     if(w > h)
     {
@@ -89,9 +89,6 @@ void ofxUIRangeSlider::init(string _name, float _min, float _max, float *_valuel
     {
         kind = OFX_UI_WIDGET_RSLIDER_V;
     }
-    
-    paddedRect = new ofxUIRectangle(-padding, -padding, w+padding*2.0, h+padding);
-    paddedRect->setParent(rect);
     
     draw_fill = true;
     
@@ -139,18 +136,18 @@ void ofxUIRangeSlider::init(string _name, float _min, float _max, float *_valuel
     valuehigh = ofxUIMap(valuehigh, min, max, 0.0, 1.0, true);
     labelPrecision = 2;
     
+    valuelowString = ofxUIToString(getScaledValueLow(),labelPrecision);
+    valuehighString = ofxUIToString(getScaledValueHigh(),labelPrecision);
+    
     if(kind == OFX_UI_WIDGET_RSLIDER_H)
     {
-        label = new ofxUILabel(0,h+padding,(name+" LABEL"), (name + ": " + ofxUIToString(getScaledValueLow(),labelPrecision) + " " + ofxUIToString(getScaledValueHigh(),labelPrecision)), _size);
+        label = new ofxUILabel(0,h+padding,(name+" LABEL"), (name + ": " + valuelowString + " " + valuehighString), _size);
     }
     else
     {
         label = new ofxUILabel(0,h+padding,(name+" LABEL"), name, _size);
     }
-    
-    label->setParent(label);
-    label->setRectParent(rect);
-    label->setEmbedded(true);
+    addEmbeddedWidget(label);
     
     increment = fabs(max - min) / 10.0;
 }
@@ -209,8 +206,8 @@ void ofxUIRangeSlider::drawFillHighlight()
         }
         if(kind == OFX_UI_WIDGET_RSLIDER_V)
         {
-            label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuehigh, ofxUIToString(getScaledValueHigh(),labelPrecision));
-            label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuelow, ofxUIToString(getScaledValueLow(),labelPrecision));
+            label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuehigh, valuehighString);
+            label->drawString(rect->getX()+rect->getWidth()+padding, label->getRect()->getHeight()/2.0+rect->getY()+rect->getHeight()-rect->getHeight()*valuelow, valuelowString);
         }
     }
 }
@@ -267,7 +264,7 @@ void ofxUIRangeSlider::mouseReleased(int x, int y, int button)
 {
     if(hit)
     {
-#ifdef TARGET_OPENGLES
+#ifdef OFX_UI_TARGET_TOUCH
         state = OFX_UI_STATE_NORMAL;
 #else
         state = OFX_UI_STATE_OVER;
@@ -400,24 +397,8 @@ void ofxUIRangeSlider::input(float x, float y)
         hitLow = false;
     }
     
-    if(valuehigh > 1.0)
-    {
-        valuehigh = 1.0;
-    }
-    else if(valuehigh < 0.0)
-    {
-        valuehigh = 0.0;
-    }
-    
-    if(valuelow < 0.0)
-    {
-        valuelow = 0.0;
-    }
-    else if(valuelow > 1.0)
-    {
-        valuelow = 1.0;
-    }
-    
+    valuehigh = MIN(1.0, MAX(0.0, valuehigh));
+    valuelow = MIN(1.0, MAX(0.0, valuelow));
     updateValueRef();
     updateLabel();
 }
@@ -430,9 +411,12 @@ void ofxUIRangeSlider::updateValueRef()
 
 void ofxUIRangeSlider::updateLabel()
 {
+    valuelowString = ofxUIToString(getValueLow(),labelPrecision);
+    valuehighString = ofxUIToString(getValueHigh(),labelPrecision);
+    
     if(kind == OFX_UI_WIDGET_RSLIDER_H)
     {
-        label->setLabel(name + ": " + ofxUIToString(getScaledValueLow(),labelPrecision) + " " + ofxUIToString(getScaledValueHigh(),labelPrecision));
+        label->setLabel(name + ": " + valuelowString + " " + valuehighString);
     }
 }
 
@@ -482,12 +466,6 @@ void ofxUIRangeSlider::stateChange()
     }
 }
 
-void ofxUIRangeSlider::setVisible(bool _visible)
-{
-    visible = _visible;
-    label->setVisible(visible);
-}
-
 void ofxUIRangeSlider::setValueLow(float _value)
 {
     valuelow = ofxUIMap(_value, min, max, 0.0, 1.0, true);
@@ -500,6 +478,26 @@ void ofxUIRangeSlider::setValueHigh(float _value)
     valuehigh = ofxUIMap(_value, min, max, 0.0, 1.0, true);
     updateValueRef();
     updateLabel();
+}
+
+float ofxUIRangeSlider::getValueLow()
+{
+    return (*valuelowRef);
+}
+
+float ofxUIRangeSlider::getValueHigh()
+{
+    return (*valuehighRef);
+}
+
+float ofxUIRangeSlider::getNormalizedValueLow()
+{
+    return valuelow;
+}
+
+float ofxUIRangeSlider::getNormalizedValueHigh()
+{
+    return valuehigh;
 }
 
 float ofxUIRangeSlider::getPercentValueLow()
@@ -522,16 +520,6 @@ float ofxUIRangeSlider::getScaledValueHigh()
     return ofxUIMap(valuehigh, 0.0, 1.0, min, max, true);
 }
 
-ofxUILabel *ofxUIRangeSlider::getLabel()
-{
-    return label;
-}
-
-void ofxUIRangeSlider::setLabelVisible(bool _labelVisible)
-{
-    label->setVisible(_labelVisible);
-}
-
 void ofxUIRangeSlider::setLabelPrecision(int _precision)
 {
     labelPrecision = _precision;
@@ -542,14 +530,7 @@ void ofxUIRangeSlider::setLabelPrecision(int _precision)
 void ofxUIRangeSlider::setParent(ofxUIWidget *_parent)
 {
     parent = _parent;
-    paddedRect->height += label->getPaddingRect()->height;
-    if(kind == OFX_UI_WIDGET_RSLIDER_V)
-    {
-        if(label->getPaddingRect()->width > paddedRect->width)
-        {
-            paddedRect->width = label->getPaddingRect()->width+padding;
-        }
-    }
+    calculatePaddingRect(); 
 }
 
 void ofxUIRangeSlider::setMax(float _max)
@@ -579,4 +560,21 @@ void ofxUIRangeSlider::setMaxAndMin(float _max, float _min)
 bool ofxUIRangeSlider::isDraggable()
 {
     return true;
-}  
+}
+
+#ifndef OFX_UI_NO_XML
+
+void ofxUIRangeSlider::saveState(ofxXmlSettings *XML)
+{
+    XML->setValue("HighValue", getValueHigh(), 0);
+    XML->setValue("LowValue", getValueLow(), 0);
+
+}
+
+void ofxUIRangeSlider::loadState(ofxXmlSettings *XML)
+{
+    setValueHigh(XML->getValue("HighValue", getValueHigh(), 0));
+    setValueLow(XML->getValue("LowValue", getValueLow(), 0));
+}
+
+#endif

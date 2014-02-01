@@ -76,6 +76,8 @@ public:
 	void setParent(ofxUIWidget *_parent);
     void setMax(float _max);
     void setMin(float _min);
+	float getMax();
+	float getMin();
     void setMaxAndMin(float _max, float _min);
     bool isDraggable();
 	

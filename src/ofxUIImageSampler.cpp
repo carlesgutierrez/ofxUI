@@ -25,19 +25,19 @@
 #include "ofxUIImageSampler.h"
 #include "ofxUI.h"
 
-ofxUIImageSampler::ofxUIImageSampler(float x, float y, float w, float h, ofImage *_image, string _name) : ofxUIImage(x, y, w, h, _image, _name)
+ofxUIImageSampler::ofxUIImageSampler(float x, float y, float w, float h, ofImage _image, string _name) : ofxUIImage(x, y, w, h, _image, _name)
 {
     initSampler();
 }
 
-ofxUIImageSampler::ofxUIImageSampler(float w, float h, ofImage *_image, string _name) : ofxUIImage(w, h, _image, _name)
+ofxUIImageSampler::ofxUIImageSampler(float w, float h, ofImage _image, string _name) : ofxUIImage(w, h, _image, _name)
 {
     initSampler();
 }
 
 void ofxUIImageSampler::initSampler()
 {
-    label->setVisible(false);
+    setLabelVisible(false);
     value.x = .5;
     value.y = .5;
     input(value.x*rect->getWidth(),value.y*rect->getHeight());
@@ -54,11 +54,11 @@ void ofxUIImageSampler::drawFill()
 {
     if(draw_fill)
     {
-        if(image != NULL)
+        if(image.isAllocated())
         {
             ofxUIFill();
             ofxUISetColor(255);
-            image->draw(rect->getX(), rect->getY(), rect->width, rect->height);
+            image.draw(rect->getX(), rect->getY(), rect->width, rect->height);
         }
         ofxUISetColor(color_fill);
         ofxUIDrawLine(rect->getX()+value.x*rect->getWidth(),  rect->getY(), rect->getX()+value.x*rect->getWidth(),  rect->getY()+rect->getHeight());
@@ -87,18 +87,6 @@ void ofxUIImageSampler::drawFillHighlight()
         ofxUIDrawRect(rect->getX()+value.x*rect->getWidth(), rect->getY()+value.y*rect->getHeight(), squareSize, squareSize);
         ofxUISetRectMode(OFX_UI_RECTMODE_CORNER);
     }
-}
-
-void ofxUIImageSampler::setVisible(bool _visible)
-{
-    visible = _visible;
-    label->setVisible(false);
-}
-
-void ofxUIImageSampler::setParent(ofxUIWidget *_parent)
-{
-    parent = _parent;
-    paddedRect->height += padding;
 }
 
 void ofxUIImageSampler::mouseDragged(int x, int y, int button)
@@ -136,7 +124,7 @@ void ofxUIImageSampler::mouseReleased(int x, int y, int button)
 {
     if(hit)
     {
-#ifdef TARGET_OPENGLES
+#ifdef OFX_UI_TARGET_TOUCH
         state = OFX_UI_STATE_NORMAL;
 #else
         state = OFX_UI_STATE_OVER;
@@ -206,7 +194,7 @@ void ofxUIImageSampler::input(int x, int y)
     {
         value.y = 0.0;
     }
-    sampledColor = image->getColor(value.x*(image->getWidth()-1), value.y*(image->getHeight()-1));          //why one? well because if we get to the end, we sample the beginning...
+    sampledColor = image.getColor(value.x*(image.getWidth()-1), value.y*(image.getHeight()-1));          //why one? well because if we get to the end, we sample the beginning...
 }
 
 ofColor& ofxUIImageSampler::getColor()
@@ -244,10 +232,33 @@ void ofxUIImageSampler::setValue(ofPoint _value)
     {
         value.y = 0.0;
     }
-    sampledColor = image->getColor(value.x*(image->getWidth()-1), value.y*(image->getHeight()-1));          //why one? well because if we get to the end, we sample the beginning...
+    sampledColor = image.getColor(value.x*(image.getWidth()-1), value.y*(image.getHeight()-1));          //why one? well because if we get to the end, we sample the beginning...
 }
 
 bool ofxUIImageSampler::isDraggable()
 {
     return true;
 }
+
+#ifndef OFX_UI_NO_XML
+
+void ofxUIImageSampler::saveState(ofxXmlSettings *XML)
+{
+    XML->setValue("XValue", getValue().x, 0);
+    XML->setValue("YValue", getValue().y, 0);
+    XML->setValue("RColor", getColor().r, 0);
+    XML->setValue("GColor", getColor().g, 0);
+    XML->setValue("BColor", getColor().b, 0);
+    XML->setValue("AColor", getColor().a, 0);
+}
+
+void ofxUIImageSampler::loadState(ofxXmlSettings *XML)
+{
+    setValue(ofxUIVec2f(XML->getValue("XValue", getValue().x, 0), XML->getValue("YValue", getValue().y, 0)));
+    setColor(ofxUIColor(XML->getValue("RColor", getColor().r, 0),
+                        XML->getValue("GColor", getColor().g, 0),
+                        XML->getValue("BColor", getColor().b, 0),
+                        XML->getValue("AColor", getColor().a, 0)));
+}
+
+#endif

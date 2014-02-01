@@ -32,10 +32,7 @@ public:
     ofxUIToggle();
     ofxUIToggle(string _name, bool _value, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
     ofxUIToggle(string _name, bool *_value, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
-	ofxUIToggle(float x, float y, float w, float h, bool _value, string _name, int _size = OFX_UI_FONT_SMALL);
-	ofxUIToggle(float w, float h, bool _value, string _name, int _size = OFX_UI_FONT_SMALL);
-	ofxUIToggle(float x, float y, float w, float h, bool *_value, string _name, int _size = OFX_UI_FONT_SMALL);
-	ofxUIToggle(float w, float h, bool *_value, string _name, int _size = OFX_UI_FONT_SMALL);
+	virtual void setParent(ofxUIWidget *_parent);
     virtual void setDrawPadding(bool _draw_padded_rect);
     virtual void setDrawPaddingOutline(bool _draw_padded_rect_outline);
     virtual void mouseMoved(int x, int y );
@@ -43,4 +40,9 @@ public:
     virtual void mousePressed(int x, int y, int button);
     virtual void mouseReleased(int x, int y, int button);
     virtual void setValue(bool _value);
+    bool hasState(){ return true; };
+#ifndef OFX_UI_NO_XML
+    virtual void saveState(ofxXmlSettings *XML);
+    virtual void loadState(ofxXmlSettings *XML);
+#endif
 };

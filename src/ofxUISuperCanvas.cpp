@@ -74,14 +74,17 @@ void ofxUISuperCanvas::setDeltaTime(float _deltaTime)
 
 void ofxUISuperCanvas::setMinified(bool _bIsMinified)
 {
-    bIsMinified = _bIsMinified;
-    if(bIsMinified)
+    if(bIsMinified != _bIsMinified)
     {
-        minify();
-    }
-    else
-    {
-        maximize();
+        bIsMinified = _bIsMinified;
+        if(bIsMinified)
+        {
+            minify();
+        }
+        else
+        {
+            maximize();
+        }
     }
 }
 
@@ -100,7 +103,7 @@ ofxUILabel *ofxUISuperCanvas::getCanvasTitle()
     return canvasTitle;
 }
 
-#ifdef TARGET_OPENGLES
+#ifdef OFX_UI_TARGET_TOUCH
 
 void ofxUISuperCanvas::touchDown(float x, float y, int id)
 {
@@ -219,7 +222,7 @@ void ofxUISuperCanvas::saveSettings(string fileName)
         {
             XML->setValue("Kind", widgetsWithState[i]->getKind(), 0);
             XML->setValue("Name", widgetsWithState[i]->getName(), 0);
-            writeSpecificWidgetData(widgetsWithState[i], XML);
+            widgetsWithState[i]->saveState(XML);
         }
         XML->popTag();
     }
@@ -237,9 +240,9 @@ void ofxUISuperCanvas::loadSettings(string fileName)
         XML->pushTag("Widget", i);
         string name = XML->getValue("Name", "NULL", 0);
         ofxUIWidget *widget = getWidget(name);
-        if(widget != NULL)
+        if(widget != NULL && widget->hasState())
         {
-            loadSpecificWidgetData(widget, XML);
+            widget->loadState(XML);
             if(bTriggerWidgetsUponLoad)
             {
                 triggerEvent(widget);

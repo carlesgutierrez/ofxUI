@@ -25,51 +25,58 @@
 #include "ofxUIImage.h"
 #include "ofxUI.h"
 
-ofxUIImage::ofxUIImage(float x, float y, float w, float h, ofImage *_image, string _name) : ofxUIWidgetWithLabel()
+ofxUIImage::ofxUIImage(float x, float y, float w, float h, ofImage _image, string _name) : ofxUIWidgetWithLabel()
 {
-    rect = new ofxUIRectangle(x,y,w,h);
-    init(w, h, _image, _name);
+    init(x, y, w, h, _image, _name);
 }
 
-ofxUIImage::ofxUIImage(float x, float y, float w, float h, ofImage *_image, string _name, bool _showLabel) : ofxUIWidgetWithLabel()
+ofxUIImage::ofxUIImage(float x, float y, float w, float h, ofImage _image, string _name, bool _showLabel) : ofxUIWidgetWithLabel()
 {
-    rect = new ofxUIRectangle(x,y,w,h);
-    init(w, h, _image, _name);
-    showLabel = _showLabel;
+    init(x, y, w, h, _image, _name);
+    setLabelVisible(_showLabel);
 }
 
-ofxUIImage::ofxUIImage(float w, float h, ofImage *_image, string _name) : ofxUIWidgetWithLabel()
+ofxUIImage::ofxUIImage(float w, float h, ofImage _image, string _name) : ofxUIWidgetWithLabel()
 {
-    rect = new ofxUIRectangle(0,0,w,h);
-    init(w, h, _image, _name);
+    init(0, 0, w, h, _image, _name);
 }
 
-ofxUIImage::ofxUIImage(float w, float h, ofImage *_image, string _name, bool _showLabel) : ofxUIWidgetWithLabel()
+ofxUIImage::ofxUIImage(float w, float h, ofImage _image, string _name, bool _showLabel) : ofxUIWidgetWithLabel()
 {
-    rect = new ofxUIRectangle(0,0,w,h);
-    init(w, h, _image, _name);
-    showLabel = _showLabel;
+    init(0, 0, w, h, _image, _name);
+    setLabelVisible(_showLabel);
 }
-
-void ofxUIImage::init(float w, float h, ofImage *_image, string _name)
+void ofxUIImage::init(float x, float y, float w, float h, ofImage _image, string _name)
 {
+    initRect(x,y,w,h);
     name = string(_name);
     kind = OFX_UI_WIDGET_IMAGE;
-    showLabel = true;
-    paddedRect = new ofxUIRectangle(-padding, -padding, w+padding*2.0, h+padding);
-    paddedRect->setParent(rect);
     
     draw_back = false;
     draw_fill = true;
     
     image = _image;
     
-    label = new ofxUILabel(0,h+padding,(name+" LABEL"),name, OFX_UI_FONT_SMALL);
-    label->setParent(label);
-    label->setRectParent(rect);
-    label->setEmbedded(true);
+    label = new ofxUILabel(0,h+padding*2.0,(name+" LABEL"),name, OFX_UI_FONT_SMALL);
+    addEmbeddedWidget(label);
     cropImageToFitRect = false;
 }
+/*
+void ofxUIImage::init(float x, float y, float w, float h, ofImage *_image, string _name)
+{
+    initRect(x,y,w,h);
+    name = string(_name);
+    kind = OFX_UI_WIDGET_IMAGE;
+    
+    draw_back = false;
+    draw_fill = true;
+    
+    image = _image; // This with pointer are not really well copying data; Problems using Singletoon clases that images are loaded from external clases... 
+    
+    label = new ofxUILabel(0,h+padding*2.0,(name+" LABEL"),name, OFX_UI_FONT_SMALL);
+    addEmbeddedWidget(label);
+    cropImageToFitRect = false;
+}*/
 
 void ofxUIImage::setDrawPadding(bool _draw_padded_rect)
 {
@@ -87,26 +94,20 @@ void ofxUIImage::drawFill()
 {
     if(draw_fill)
     {
-        if(image != NULL)
+        if(image.isAllocated())
         {
             ofxUIFill();
             ofxUISetColor(255);
             if(cropImageToFitRect)
             {
-                image->drawSubsection(rect->getX(), rect->getY(), rect->width, rect->height, 0, 0, rect->width, rect->height);
+                image.drawSubsection(rect->getX(), rect->getY(), rect->width, rect->height, 0, 0, rect->width, rect->height);
             }
             else
             {
-                image->draw(rect->getX(), rect->getY(), rect->width, rect->height);
+                image.draw(rect->getX(), rect->getY(), rect->width, rect->height);
             }
         }
     }
-}
-
-void ofxUIImage::setVisible(bool _visible)
-{
-    visible = _visible;
-    label->setVisible(showLabel && _visible);
 }
 
 void ofxUIImage::setCropImageToFitRect(bool _cropImageToFitRect)
@@ -114,28 +115,9 @@ void ofxUIImage::setCropImageToFitRect(bool _cropImageToFitRect)
     cropImageToFitRect = _cropImageToFitRect;
 }
 
-ofxUILabel *ofxUIImage::getLabel()
-{
-    return label;
-}
-
-void ofxUIImage::setImage(ofImage *_image)
+void ofxUIImage::setImage(ofImage _image)
 {
     image = _image;
-}
-
-void ofxUIImage::setParent(ofxUIWidget *_parent)
-{
-    parent = _parent;
-    if(showLabel)
-    {
-        paddedRect->height += label->getPaddingRect()->height;
-    }
-    else
-    {
-        paddedRect->height += padding;
-    }
-    label->setVisible(showLabel);
 }
 
 bool ofxUIImage::isDraggable()

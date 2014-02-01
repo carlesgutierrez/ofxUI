@@ -55,21 +55,27 @@ public:
     void updateValueRef();
 	void updateLabel();
     void stateChange();
-    void setVisible(bool _visible);
 	void setValueLow(float _value);
 	void setValueHigh(float _value);
-	float getPercentValueLow();
+    float getValueLow();
+    float getValueHigh();
+    float getNormalizedValueLow();
+    float getNormalizedValueHigh();
+    float getPercentValueLow();
 	float getPercentValueHigh();
 	float getScaledValueLow();
 	float getScaledValueHigh();
-	ofxUILabel *getLabel();
-    void setLabelVisible(bool _labelVisible);
     void setLabelPrecision(int _precision);
 	void setParent(ofxUIWidget *_parent);
     void setMax(float _max);
     void setMin(float _min);
     void setMaxAndMin(float _max, float _min);
     bool isDraggable();
+    bool hasState(){ return true; };
+#ifndef OFX_UI_NO_XML
+    virtual void saveState(ofxXmlSettings *XML);
+    virtual void loadState(ofxXmlSettings *XML);
+#endif
     
 protected:    
 	float valuelow, valuehigh, increment; 
@@ -80,5 +86,7 @@ protected:
 	bool hitHigh, hitLow, hitCenter; 
 	float hitPoint; 
 	float max, min; 
-    int labelPrecision;        
+    int labelPrecision;
+    string valuelowString;
+    string valuehighString; 
 }; 

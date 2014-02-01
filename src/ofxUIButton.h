@@ -33,10 +33,6 @@ public:
     ofxUIButton();
     ofxUIButton(string _name, bool _value, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
     ofxUIButton(string _name, bool *_value, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
-    ofxUIButton(float x, float y, float w, float h, bool _value, string _name, int _size = OFX_UI_FONT_SMALL);
-    ofxUIButton(float w, float h, bool _value, string _name, int _size = OFX_UI_FONT_SMALL);
-    ofxUIButton(float x, float y, float w, float h, bool *_value, string _name, int _size = OFX_UI_FONT_SMALL);
-    ofxUIButton(float w, float h, bool *_value, string _name, int _size = OFX_UI_FONT_SMALL);
     ~ofxUIButton();
     virtual void init(string _name, bool *_value, float w, float h, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
     virtual void drawFill();
@@ -45,20 +41,16 @@ public:
     virtual void mousePressed(int x, int y, int button);
     virtual void mouseReleased(int x, int y, int button);
     virtual void stateChange();
-    virtual void setVisible(bool _visible);
-	ofxUILabel *getLabel();
 	virtual void setParent(ofxUIWidget *_parent);
 	bool getValue();
-    void setLabelVisible(bool _visible);
     virtual void setValue(bool _value);
     virtual void setValuePtr(bool *_value);
 	void toggleValue();
     virtual bool isHit(float x, float y);
     void setLabelPosition(ofxUIWidgetPosition pos);
-    
+    virtual bool hasState(){ return false; };
 protected:
     bool *value; 
     bool useReference; 
-    bool drawLabel;
     bool bLabelRight; 
 }; 

@@ -3,11 +3,13 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 	
-    red = 233; blue = 52; green = 27;
+    ofSetCircleResolution(120);
+    red = 233; blue = 233; green = 233;
     hideGUI = false;
     bdrawGrid = false;
 	bdrawPadding = false;
-    
+
+    textInput = NULL;
     img = new ofImage();
     img->loadImage("nerd_me.png");
     buffer = new float[256];
@@ -18,6 +20,12 @@ void ofApp::setup(){
     setGUI3();
     setGUI4();
     setGUI5();
+    
+    gui1->loadSettings("gui1Settings.xml");
+    gui2->loadSettings("gui2Settings.xml");
+    gui3->loadSettings("gui3Settings.xml");
+    gui4->loadSettings("gui4Settings.xml");
+    gui5->loadSettings("gui5Settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -50,24 +58,29 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 	string name = e.getName();
 	int kind = e.getKind();
 	cout << "got event from: " << name << endl;
+    if(kind == OFX_UI_WIDGET_NUMBERDIALER)
+    {
+        ofxUINumberDialer *n = (ofxUINumberDialer *) e.widget;
+        cout << n->getValue() << endl;
+    }
 	
 	if(name == "RED")
 	{
 		ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-		cout << "RED " << slider->getScaledValue() << endl;
-		red = slider->getScaledValue();
+		cout << "RED " << slider->getValue() << endl;
+		red = slider->getValue();
 	}
 	else if(name == "GREEN")
 	{
 		ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-		cout << "GREEN " << slider->getScaledValue() << endl;
-		green = slider->getScaledValue();
+		cout << "GREEN " << slider->getValue() << endl;
+		green = slider->getValue();
 	}	
 	else if(name == "BLUE")
 	{
 		ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-		cout << "BLUE " << slider->getScaledValue() << endl;
-		blue = slider->getScaledValue();
+		cout << "BLUE " << slider->getValue() << endl;
+		blue = slider->getValue();
 	}
 	else if(name == "BUTTON")
 	{
@@ -78,6 +91,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 	{
 		ofxUIToggle *toggle = (ofxUIToggle *) e.getToggle();
 		bdrawGrid = toggle->getValue();
+        if(textInput != NULL)
+        {
+            textInput->setFocus(bdrawGrid);
+        }
 	}
     else if(name == "TEXT INPUT")
     {
@@ -102,6 +119,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
 //--------------------------------------------------------------
 void ofApp::exit()
 {
+    gui1->saveSettings("gui1Settings.xml");
+    gui2->saveSettings("gui2Settings.xml");
+    gui3->saveSettings("gui3Settings.xml");
+    gui4->saveSettings("gui4Settings.xml");
+    gui5->saveSettings("gui5Settings.xml");
+    
 	delete gui1;
 	delete gui2;
     delete gui3;
@@ -119,6 +142,24 @@ void ofApp::keyPressed(int key){
     }
 	switch (key)
 	{
+		case 't':
+        {
+            if(textInput != NULL)
+            {
+                textInput->setTextString(ofGetTimestampString());
+            }
+        }
+			break;
+            
+		case 'r':
+        {
+            if(textInput != NULL)
+            {
+                textInput->setFocus(!textInput->isFocused());
+            }
+        }
+			break;
+
 		case 'f':
 			ofToggleFullscreen();
 			break;
@@ -128,6 +169,7 @@ void ofApp::keyPressed(int key){
             gui2->toggleVisible();
             gui3->toggleVisible();
             gui4->toggleVisible();
+            gui5->toggleVisible();
 			break;
             
 		case 'p':
@@ -136,6 +178,7 @@ void ofApp::keyPressed(int key){
 			gui2->setDrawWidgetPaddingOutline(bdrawPadding);
 			gui3->setDrawWidgetPaddingOutline(bdrawPadding);
 			gui4->setDrawWidgetPaddingOutline(bdrawPadding);
+			gui5->setDrawWidgetPaddingOutline(bdrawPadding);
 			break;
             
 		case '[':
@@ -143,6 +186,7 @@ void ofApp::keyPressed(int key){
 			gui2->setDrawWidgetPadding(false);
 			gui3->setDrawWidgetPadding(false);
 			gui4->setDrawWidgetPadding(false);
+			gui5->setDrawWidgetPadding(false);
 			break;
             
 		case ']':
@@ -150,6 +194,7 @@ void ofApp::keyPressed(int key){
 			gui2->setDrawWidgetPadding(true);
 			gui3->setDrawWidgetPadding(true);
 			gui4->setDrawWidgetPadding(true);
+			gui5->setDrawWidgetPadding(true);
 			break;
 			
         case '1':
@@ -167,7 +212,11 @@ void ofApp::keyPressed(int key){
         case '4':
             gui4->toggleVisible();
             break;
-            
+
+        case '5':
+            gui5->toggleVisible();
+            break;
+
 		default:
 			break;
 	}
@@ -202,7 +251,7 @@ void ofApp::setGUI1()
     
     gui1->addSpacer();
 	gui1->addLabel("H SLIDERS");
-	gui1->addSlider("RED", 0.0, 255.0, red); 
+	gui1->addSlider("RED", 0.0, 255.0, red);
 	gui1->addSlider("GREEN", 0.0, 255.0, green);
 	gui1->addSlider("BLUE", 0.0, 255.0, blue);
     
@@ -235,7 +284,7 @@ void ofApp::setGUI1()
     
     string textString = "This widget is a text area widget. Use this when you need to display a paragraph of text. It takes care of formatting the text to fit the block.";
     gui1->addSpacer();
-    gui1->addTextArea("textarea", textString, OFX_UI_FONT_MEDIUM);
+    gui1->addTextArea("textarea", textString, OFX_UI_FONT_SMALL);
     
     gui1->autoSizeToFitWidgets();
 	ofAddListener(gui1->newGUIEvent,this,&ofApp::guiEvent);
@@ -246,18 +295,26 @@ void ofApp::setGUI2()
     gui2 = new ofxUISuperCanvas("PANEL 2: ADVANCED");
     
     gui2->addSpacer();
-	gui2->addLabel("TEXT INPUT", OFX_UI_FONT_SMALL);
-	gui2->setWidgetFontSize(OFX_UI_FONT_LARGE);
-	gui2->addTextInput("TEXT INPUT", "Input Text");
+	gui2->setWidgetFontSize(OFX_UI_FONT_MEDIUM);
+    textInput = gui2->addTextInput("TEXT INPUT", "Input Text");
     gui2->addLabel("AUTO CLEAR DISABLED", OFX_UI_FONT_SMALL);
     gui2->addTextInput("TEXT INPUT2", "Input Text")->setAutoClear(false);
 	gui2->setWidgetFontSize(OFX_UI_FONT_MEDIUM);
-    
+
     gui2->addSpacer();
     gui2->addLabel("WAVEFORM DISPLAY");
 	gui2->addWaveform("WAVEFORM", buffer, 256, 0.0, 1.0);
     gui2->addLabel("SPECTRUM DISPLAY");
     gui2->addSpectrum("SPECTRUM", buffer, 256, 0.0, 1.0);
+    
+    vector<float> buffer;
+    for(int i = 0; i < 256; i++)
+    {
+        buffer.push_back(0.0);
+    }
+
+    gui2->addLabel("MOVING GRAPH", OFX_UI_FONT_MEDIUM);
+    mg = gui2->addMovingGraph("MOVING", buffer, 256, 0.0, 1.0);
     
     gui2->addSpacer();
     gui2->addLabel("IMAGE DISPLAY");
@@ -266,18 +323,19 @@ void ofApp::setGUI2()
     gui2->addSpacer();
     gui2->addLabel("FPS LABEL");
     gui2->addFPS();
-    
+
+    gui2->setWidgetFontSize(OFX_UI_FONT_SMALL);
     gui2->addSpacer();
     gui2->addLabel("NUMBER DIALER");
-    gui2->addNumberDialer("NUMBER DIALER", -10000, 10000, 5000, 1);
+    gui2->addNumberDialer("DIALER", -10000, 10000, 5000, 3); 
     
     gui2->addSpacer();
     gui2->addLabel("LABEL BUTTON", OFX_UI_FONT_MEDIUM);
-    gui2->addLabelButton("LABEL BUTTON", false);
+    gui2->addLabelButton("LABEL BTN", false);
     
     gui2->addSpacer();
     gui2->addLabel("LABEL TOGGLES", OFX_UI_FONT_MEDIUM);
-    gui2->addLabelToggle("LABEL TOGGLE", false);
+    gui2->addLabelToggle("LABEL TGL", false)->getLabelWidget()->setColorFill(ofColor(255, 0, 0));
     
     gui2->setPosition(212, 0);
     gui2->autoSizeToFitWidgets();
@@ -290,31 +348,33 @@ void ofApp::setGUI3()
 	gui3 = new ofxUISuperCanvas("PANEL 3: ADVANCED");
     
     gui3->addSpacer();
-    gui3->setGlobalButtonDimension(32);
+    gui3->setGlobalButtonDimension(24);
     gui3->addLabel("MATRIX", OFX_UI_FONT_MEDIUM);
-    gui3->addToggleMatrix("MATRIX1", 4, 4);
+    gui3->addToggleMatrix("MATRIX1", 3, 3);
     gui3->addToggleMatrix("MATRIX2", 3, 6);
     gui3->addToggleMatrix("MATRIX3", 1, 4);
-    
+
     gui3->addSpacer();
     gui3->setGlobalButtonDimension(64);
     gui3->addImageButton("IMAGEBTN", "GUI/images/App.png", false);
-	gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui3->addImageToggle("IMAGETGL", "GUI/images/Preview.png", false);
     gui3->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
-    gui3->addSpacer();
-    gui3->addLabel("DROP DOWN", OFX_UI_FONT_MEDIUM);
-    
     vector<string> items;
-    items.push_back("FIRST ITEM");
-    items.push_back("SECOND ITEM");
-    items.push_back("THIRD ITEM WHATS UP DOG");
-    items.push_back("FOURTH ITEM");
-    items.push_back("FIFTH ITEM");
-    items.push_back("SIXTH ITEM");
+    items.push_back("FIRST ITEM"); items.push_back("SECOND ITEM"); items.push_back("THIRD ITEM");
+    items.push_back("FOURTH ITEM"); items.push_back("FIFTH ITEM"); items.push_back("SIXTH ITEM");
     
-    gui3->addDropDownList("DROP DOWN LIST", items, 200);
+    gui3->addSpacer();
+    gui3->setWidgetFontSize(OFX_UI_FONT_SMALL);
+    gui3->addSortableList("SORTABLE LIST", items);
+    
+    gui3->addSpacer();
+    gui3->setWidgetFontSize(OFX_UI_FONT_MEDIUM);
+    gui3->addDropDownList("DROP DOWN LIST", items);
+
+    gui3->setGlobalButtonDimension(OFX_UI_GLOBAL_BUTTON_DIMENSION);
+    
     gui3->setPosition(212*2, 0);
     gui3->autoSizeToFitWidgets();
     
@@ -330,20 +390,11 @@ void ofApp::setGUI4()
     gui4->addBiLabelSlider("BILABEL", "HOT", "COLD", 0, 100, 50);
     
     gui4->addLabel("MINIMAL SLIDER");
-    gui4->addMinimalSlider("MINIMAL", 0, 100, 50.0);
+    gui4->addMinimalSlider("MINIMAL", 0, 100, 50.0)->getLabelWidget()->setColorFill(ofColor(255, 255, 0));
     
     gui4->addSpacer();
     gui4->addLabel("FPS SLIDER", OFX_UI_FONT_MEDIUM);
-    gui4->addFPSSlider("FPS SLIDER"); 
-    
-    vector<float> buffer;
-    for(int i = 0; i < 256; i++)
-    {
-        buffer.push_back(0.0);
-    }
-    
-    gui4->addLabel("MOVING GRAPH", OFX_UI_FONT_MEDIUM);
-    mg = (ofxUIMovingGraph *) gui4->addMovingGraph("MOVING GRAPH", buffer, 256, 0, 1.0);
+    gui4->addFPSSlider("FPS SLIDER");
     
     gui4->addSpacer();
     gui4->addLabel("IMAGE SAMPLER", OFX_UI_FONT_MEDIUM);
@@ -351,15 +402,16 @@ void ofApp::setGUI4()
     gui4->setGlobalButtonDimension(64); 
     gui4->addMultiImageButton("IMAGE BUTTON", "GUI/toggle.png", false);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui4->addMultiImageToggle("IMAGE BUTTON", "GUI/toggle.png", false);
+    gui4->addMultiImageToggle("IMAGE TOGGLE", "GUI/toggle.png", false);
     gui4->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
-    vector<std::string> items;
-    items.push_back("FIRST ITEM"); items.push_back("SECOND ITEM"); items.push_back("THIRD ITEM");
-    items.push_back("FOURTH ITEM"); items.push_back("FIFTH ITEM"); items.push_back("SIXTH ITEM");
-    gui4->setWidgetFontSize(OFX_UI_FONT_SMALL);
-    gui4->addSortableList("SORTABLE LIST", items);
+    gui4->addBaseDraws("BASE DRAW", img, true);
 
+    gui4->addSpacer();
+    gui4->setGlobalButtonDimension(32);
+    gui4->addButton("BTN", false)->setLabelVisible(false);
+    gui4->addToggle("TGL", false)->setLabelVisible(false);
+    
     gui4->setPosition(212*3,0);
     gui4->autoSizeToFitWidgets();
     
