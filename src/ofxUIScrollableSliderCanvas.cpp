@@ -33,13 +33,15 @@ ofxUIScrollableSliderCanvas::~ofxUIScrollableSliderCanvas()
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float w, float h) : ofxUICanvas(x,y,w,h)
 {
     initScrollable();
-	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, 0, OFX_UI_FONT_SMALL);	
+	//(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size)
+	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, y, OFX_UI_FONT_SMALL);	
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float w, float h, ofxUICanvas *sharedResources) : ofxUICanvas(x,y,w,h,sharedResources)
 {
     initScrollable();
-	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, 0, OFX_UI_FONT_SMALL);
+	//(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size)
+	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, y, OFX_UI_FONT_SMALL);
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas() : ofxUICanvas()
@@ -89,12 +91,11 @@ void ofxUIScrollableSliderCanvas::initScrollable()
 
 void ofxUIScrollableSliderCanvas::setupScrollBar(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size){
 
-	// Canvas for Slider
 	gui_slider = new ofxUICanvas(_x+2, _y, _w, _h);
 	
-	gui_slider->addWidgetLeft(new ofxUIScrollSlider(_name, _min, _max, _lowvalue, _highvalue, _w - 5, _h - 5, _x, _y, OFX_UI_FONT_SMALL));
-	//gui_slider->addWidgetLeft(new ofxUIScrollSlider(_name, 0, 400, 380, 400, 20, 390, 0, 0, OFX_UI_FONT_SMALL));
-	gui_slider->setDrawPaddingOutline(false);  // draw border
+	gui_slider->addWidgetRight(new ofxUIScrollSlider(_name, _min, _max, _lowvalue, _highvalue, _w - 5, _h - 5, _x, _y, OFX_UI_FONT_SMALL));
+
+	gui_slider->setDrawPaddingOutline(false);
 	
 	ofAddListener(gui_slider->newGUIEvent,this,&ofxUIScrollableSliderCanvas::guiEvent);
 }
@@ -235,11 +236,6 @@ void ofxUIScrollableSliderCanvas::update()
         {
             float dyTop = rect->y - sRect->y;
             float dyBot = (sRect->y+sRect->getHeight()) - (rect->y+rect->getHeight());
-			//float dyTop = rectInternal->y - sRectInternal->y;
-			//float dyBot = (sRectInternal->y+sRectInternal->getHeight()) - (rectInternal->y+rectInternal->getHeight());
-            
-			//cout << "dyTop = " << dyTop << endl;
-			//cout << "dyBot = " << dyBot << endl;
 			
 			if(fabs(dyBot) < stickyDistance)
             {
@@ -398,7 +394,7 @@ void ofxUIScrollableSliderCanvas::draw()
     
     ofxUIPopStyle();
 	
-	//c
+	//draw scroll bar
 	gui_slider->draw();
 }
 
@@ -663,33 +659,17 @@ ofVec2f ofxUIScrollableSliderCanvas::calcHeightContends(vector<ofxUIWidget*> _au
 //--------------------------------------------------------------
 void ofxUIScrollableSliderCanvas::updateScrollBarSize(vector<ofxUIWidget*> _auxwidgets, float maxrange, float minrange){
 	
-	float sizeScrollbar = -1;
-	
 	if(scrollY){
-		//get  vector<ofxUIWidget*> getWidgets()
-		vector<ofxUIWidget*> auxwidgets = getWidgets();
-		ofVec2f maxims = calcHeightContends(auxwidgets); 
-		int sizeHContend = maxims.y;// y is heigh, x is width
-
-		//sizeScrollbar = ofxUIMap(sizeHContend, 0, 2000, 400, 10, true);
-		sizeScrollbar = ofxUIMap(sizeHContend, 0, maxrange, minrange, 10, true);
-		//gui_slider
-		gui_slider->getWidgets();
 		
-		for(vector<ofxUIWidget *>::iterator it = _auxwidgets.begin(); it != _auxwidgets.end(); ++it)
-		{
-			string name = (*it)->getName();
-			
-			if(name == "S"){	
-				ofxUIScrollSlider* scrollSlider =  (ofxUIScrollSlider *)(*it);
-				scrollSlider->setValueHigh(scrollSlider->getScaledValueHigh()+sizeScrollbar*0.5);
-				scrollSlider->setValueLow(scrollSlider->getScaledValueHigh()-sizeScrollbar*0.5);
-				cout << "updateScrollBarSize:: sizeHContend= " << sizeHContend << "new sixeScrollBar is=" << sizeScrollbar << "in slider named =" << name << endl;
-			}
-		}	
+		float sizeScrollbar = -1;
+		int sizeHContend = calcHeightContends(getWidgets()).y;// y is heigh, x is width
+		sizeScrollbar = ofxUIMap(sizeHContend, 0, maxrange, minrange, 10, true);
+		ofxUIScrollSlider* scrollSlider = (ofxUIScrollSlider*)gui_slider->getWidget("S");
+		
+		scrollSlider->setValueHigh(scrollSlider->getScaledValueHigh()+sizeScrollbar*0.5);
+		scrollSlider->setValueLow(scrollSlider->getScaledValueHigh()-sizeScrollbar*0.5);
 	}
 	
-//	return sizeScrollbar;
 }
 
 //--------------------------------------------------------------
@@ -698,11 +678,10 @@ void ofxUIScrollableSliderCanvas::updateScrollPosition(int max){
 		
 		vector<ofxUIWidget*> auxwidgets = getWidgets();
 		ofVec2f maxims = calcHeightContends(auxwidgets); 
-		int sizeHContend = maxims.y;// y is heigh, x is width
+		int sizeHContend = maxims.y;
 		
-		float fixybottompos = ofxUIMap(posScrollbar, 0, 1, 0, -sizeHContend*0.5, true); 
-		
-		float posmap = ofxUIMap(posScrollbar, 0, 1, 0, -sizeHContend+max, true); 
+		//Find real canvas position. From 'y' position to 'maxY + y'
+		float posmap = ofxUIMap(posScrollbar, 0, 1, +sRect->y, -sizeHContend+max+sRect->y, true); 
 		
 		//finally move the canvas to direct pos finded between the maximum and minimum
 		rect->y = posmap;		
@@ -715,8 +694,6 @@ void ofxUIScrollableSliderCanvas::guiEvent(ofxUIEventArgs &e)
 {
 	string name = e.widget->getName();
 	int kind = e.widget->getKind();
-	
-	//cout << "got event from: " << name << endl;
 	
 	if(name == "S"){
 		ofxUIScrollSlider* scrollSlider =  (ofxUIScrollSlider *)e.widget;
