@@ -81,7 +81,6 @@ public:
     virtual bool isHit(int x, int y);
 	
 	//c
-	void setGUI_SrollSlider(string name, float _min, float _max, int lowvalue, int highvalue, int w, int h, int x, int y, int _size);
 	void guiEvent(ofxUIEventArgs &e);
 	ofxUICanvas* getScroll(); // TODO try to find a better name
 

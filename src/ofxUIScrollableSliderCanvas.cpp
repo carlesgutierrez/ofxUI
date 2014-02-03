@@ -33,21 +33,27 @@ ofxUIScrollableSliderCanvas::~ofxUIScrollableSliderCanvas()
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float w, float h) : ofxUICanvas(x,y,w,h)
 {
     initScrollable();
+	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, 0, OFX_UI_FONT_SMALL);	
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float w, float h, ofxUICanvas *sharedResources) : ofxUICanvas(x,y,w,h,sharedResources)
 {
     initScrollable();
+	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, 0, OFX_UI_FONT_SMALL);
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas() : ofxUICanvas()
 {
     initScrollable();
+	//TODO 
+	//setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, 0, OFX_UI_FONT_SMALL);
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(ofxUICanvas *sharedResources) : ofxUICanvas(sharedResources)
 {
     initScrollable();
+	//TODO 
+	//setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, 0, OFX_UI_FONT_SMALL);
 }
 
 void ofxUIScrollableSliderCanvas::initScrollable()
@@ -83,10 +89,14 @@ void ofxUIScrollableSliderCanvas::initScrollable()
 
 void ofxUIScrollableSliderCanvas::setupScrollBar(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size){
 
-	//Scroll bar // name, _min, _max, lowvalue, highvalue, w,						h,		x,		y,	OFX_UI_FONT_SMALL
-	//	name,	0,	400,	380,	400,		25(minimum suported),	390,	CanvasW, 0, OFX_UI_FONT_SMALL
-	//setGUI_SrollSlider(scrollBarname, 0, CanvasH, CanvasH-20, CanvasH, 25, CanvasH, xInit+CanvasW, 0, OFX_UI_FONT_SMALL);
-	setGUI_SrollSlider( _name, _min, _max, _lowvalue, _highvalue, _w, _h, _x, _y, _size);
+	// Canvas for Slider
+	gui_slider = new ofxUICanvas(_x+2, _y, _w, _h);
+	
+	gui_slider->addWidgetLeft(new ofxUIScrollSlider(_name, _min, _max, _lowvalue, _highvalue, _w - 5, _h - 5, _x, _y, OFX_UI_FONT_SMALL));
+	//gui_slider->addWidgetLeft(new ofxUIScrollSlider(_name, 0, 400, 380, 400, 20, 390, 0, 0, OFX_UI_FONT_SMALL));
+	gui_slider->setDrawPaddingOutline(false);  // draw border
+	
+	ofAddListener(gui_slider->newGUIEvent,this,&ofxUIScrollableSliderCanvas::guiEvent);
 }
 
 void ofxUIScrollableSliderCanvas::setDamping(float _damping)
@@ -700,19 +710,6 @@ void ofxUIScrollableSliderCanvas::updateScrollPosition(int max){
 }
 
 //c
-//--------------------------------------------------------------
-void ofxUIScrollableSliderCanvas::setGUI_SrollSlider(string name, float _min, float _max, int lowvalue, int highvalue, int w, int h, int x, int y, int _size){	
-	// Canvas for Slider
-	//gui_slider = new ofxUICanvas(x+2, y, w, h);
-	gui_slider = new ofxUICanvas(x+2, y, w, h);
-	
-	//gui_slider->addWidgetLeft(new ofxUIScrollSlider(name, _min, _max, lowvalue, highvalue, w, h, x, y, OFX_UI_FONT_SMALL));
-	gui_slider->addWidgetLeft(new ofxUIScrollSlider(name, 0, 400, 380, 400, 20, 390, 0, 0, OFX_UI_FONT_SMALL));
-	gui_slider->setDrawPaddingOutline(false);  // draw border
-	
-	ofAddListener(gui_slider->newGUIEvent,this,&ofxUIScrollableSliderCanvas::guiEvent);
-}
-
 //--------------------------------------------------------------
 void ofxUIScrollableSliderCanvas::guiEvent(ofxUIEventArgs &e)
 {
