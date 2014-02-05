@@ -353,6 +353,7 @@ void ofxUI2DPad::stateChange()
 
 void ofxUI2DPad::setValue(ofxUIVec3f _value)
 {
+	/*
     if(_value.x > rangeX.y)
     {
         _value.x = rangeX.y;
@@ -370,7 +371,8 @@ void ofxUI2DPad::setValue(ofxUIVec3f _value)
     {
         _value.y = rangeY.x;
     }
-    
+    */
+	
     value.x = ofxUIMap(_value.x, rangeX.x, rangeX.y, 0.0, 1.0, true);
     value.y = ofxUIMap(_value.y, rangeY.x, rangeY.y, 0.0, 1.0, true);
     updateValueRef();

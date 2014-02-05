@@ -33,13 +33,14 @@ ofxUIScrollableSliderCanvas::~ofxUIScrollableSliderCanvas()
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float w, float h) : ofxUICanvas(x,y,w,h)
 {
     initScrollable();
-	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, 0, OFX_UI_FONT_SMALL);	
+	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, y, OFX_UI_FONT_SMALL);
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float w, float h, ofxUICanvas *sharedResources) : ofxUICanvas(x,y,w,h,sharedResources)
 {
     initScrollable();
-	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, 0, OFX_UI_FONT_SMALL);
+	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, y, OFX_UI_FONT_SMALL);
+	//(string _name, float _min, float _max, float _valuelow, float _valuehigh, float w, float h, float x, float y, int _size)
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas() : ofxUICanvas()
@@ -83,8 +84,6 @@ void ofxUIScrollableSliderCanvas::initScrollable()
 #ifdef OFX_UI_TARGET_TOUCH
     touchId = -1;
 #endif
-	
-	
 }
 
 void ofxUIScrollableSliderCanvas::setupScrollBar(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size){
