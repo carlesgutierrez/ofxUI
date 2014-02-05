@@ -281,7 +281,11 @@ void ofxUICanvas::setFontSize(ofxUIWidgetFontType _kind, int _size, int _resolut
                 delete font_large;
             }
             font_large = new ofxUIFont();
-            font_large->loadFont(fontName,_size,true, true, false, 0.0,_resolution);
+			//string filename, float fontsize, float depth, bool bUsePolygons
+			//vs
+			//string filename, int fontsize, bool _bAntiAliased=true, bool _bFullCharacterSet=false, bool makeContours=false, float simplifyAmt=0.3, int dpi=0
+
+            font_large->loadFont(fontName, _size);//, true, true, false, 0.0,_resolution);
             break;
             
         case OFX_UI_FONT_MEDIUM:
@@ -290,7 +294,7 @@ void ofxUICanvas::setFontSize(ofxUIWidgetFontType _kind, int _size, int _resolut
                 delete font_medium;
             }
             font_medium = new ofxUIFont();
-            font_medium->loadFont(fontName,_size,true, true, false, 0.0,_resolution);
+            font_medium->loadFont(fontName,_size);//,true, true, false, 0.0,_resolution);
             break;
             
         case OFX_UI_FONT_SMALL:
@@ -299,7 +303,7 @@ void ofxUICanvas::setFontSize(ofxUIWidgetFontType _kind, int _size, int _resolut
                 delete font_small;
             }
             font_small = new ofxUIFont();
-            font_small->loadFont(fontName,_size,true, true, false, 0.0,_resolution);
+            font_small->loadFont(fontName,_size);//,true, true, false, 0.0,_resolution);
             break;
     }
 }
@@ -1672,23 +1676,8 @@ ofxUIMovingGraph* ofxUICanvas::addMovingGraph(string _name, vector<float> _buffe
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
-/*
-ofxUIImage* ofxUICanvas::addImage(string _name, ofImage *_image, float _w, float _h, bool _showLabel)
-{
-    ofxUIImage* widget = new ofxUIImage(_w, _h, _image, _name, _showLabel);
-    addWidgetPosition(widget, widgetPosition, widgetAlign);
-    return widget;
-}
 
-ofxUIImage* ofxUICanvas::addImage(string _name, ofImage *_image, bool _showLabel)
-{
-    float _w = rect->getWidth()-widgetSpacing*2;
-    float _h = _w*(float)_image->getHeight()/(float)_image->getWidth();
-    ofxUIImage* widget = new ofxUIImage(_w, _h, _image, _name, _showLabel);
-    addWidgetPosition(widget, widgetPosition, widgetAlign);
-    return widget;
-}*/
-
+//c
 ofxUIImage* ofxUICanvas::addImage(string _name, ofImage *_image, float _w, float _h, bool _showLabel)
 {
     ofxUIImage* widget = new ofxUIImage(_w, _h, *_image, _name, _showLabel); // *
@@ -1938,7 +1927,6 @@ ofxUIMultiImageToggle* ofxUICanvas::addMultiImageToggle(string _name, string _pa
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
-//
 
 ofxUITextArea* ofxUICanvas::addTextArea(string _name, string _textstring, int _size)
 {
@@ -1946,6 +1934,20 @@ ofxUITextArea* ofxUICanvas::addTextArea(string _name, string _textstring, int _s
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
+//c
+ofxUITextArea* ofxUICanvas::addTextArea(string _name, wstring _textstring, int _size)
+{
+    ofxUITextArea *widget = new ofxUITextArea(_name, _textstring, rect->getWidth()-widgetSpacing*2, 0, 0, 0, _size);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+/*
+ofxUITextArea* ofxUICanvas::addTextArea(string _name, string _textstring, int w, int h, int _size)
+{
+    ofxUITextArea *widget = new ofxUITextArea(_name, _textstring, w-widgetSpacing*2, h, 0, 0, _size);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}*/
 
 ofxUISortableList* ofxUICanvas::addSortableList(string _name, vector<std::string> _items, int _size)
 {
@@ -2994,7 +2996,7 @@ bool ofxUICanvas::updateFont(ofxUIWidgetFontType _kind, string filename, int fon
                 delete font_large;
             }
             font_large = new ofxUIFont();
-            success = font_large->loadFont(filename,fontsize,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+            success = font_large->loadFont(filename,fontsize);//,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
             break;
             
         case OFX_UI_FONT_MEDIUM:
@@ -3003,7 +3005,7 @@ bool ofxUICanvas::updateFont(ofxUIWidgetFontType _kind, string filename, int fon
                 delete font_medium;
             }
             font_medium = new ofxUIFont();
-            success = font_medium->loadFont(filename,fontsize,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+            success = font_medium->loadFont(filename,fontsize);//,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
             break;
             
         case OFX_UI_FONT_SMALL:
@@ -3012,7 +3014,7 @@ bool ofxUICanvas::updateFont(ofxUIWidgetFontType _kind, string filename, int fon
                 delete font_small;
             }
             font_small = new ofxUIFont();
-            success = font_small->loadFont(filename,fontsize,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+            success = font_small->loadFont(filename,fontsize);//,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
             break;
     }
     return success;

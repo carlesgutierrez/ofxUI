@@ -261,7 +261,11 @@ public:
     ofxUIMultiImageToggle *addMultiImageToggle(string _name, string _path, bool *_value, int _size = OFX_UI_FONT_SMALL);
     ofxUIMultiImageToggle *addMultiImageToggle(string _name, string _path, bool _value, int _size = OFX_UI_FONT_SMALL);
     
-    ofxUITextArea* addTextArea(string _name, string _textstring, int _size = OFX_UI_FONT_MEDIUM);
+	
+	ofxUITextArea* addTextArea(string _name, string _textstring, int _size = OFX_UI_FONT_MEDIUM);
+	//c
+	ofxUITextArea* addTextArea(string _name, string _textstring, int w, int h, int _size = OFX_UI_FONT_MEDIUM);
+	ofxUITextArea* addTextArea(string _name, wstring _textstring, int _size = OFX_UI_FONT_MEDIUM);
     
     ofxUISortableList *addSortableList(string _name, vector<std::string> _items, int _size = -1);
     

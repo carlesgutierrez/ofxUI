@@ -83,6 +83,8 @@ public:
 	//c
 	void guiEvent(ofxUIEventArgs &e);
 	ofxUICanvas* getScroll(); // TODO try to find a better name
+	void adjustContendstoGui(bool bsnap = false);
+
 
 protected:
     ofxUIRectangle *sRect;	

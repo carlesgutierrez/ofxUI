@@ -30,8 +30,11 @@
 class ofxUITextArea : public ofxUIWidgetWithLabel
 {
 public:
+	//c
     ofxUITextArea(string _name, string _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_MEDIUM);
+	ofxUITextArea(string _name, wstring _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_MEDIUM);
     void init(string _name, string _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_MEDIUM);
+	void init(string _name, wstring _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_MEDIUM);
     virtual void drawBack();
     virtual void drawFill();
     string getTextString();
@@ -42,10 +45,16 @@ public:
     
 protected:    
 	string textstring;
+	
     vector<string> textLines;
     bool autoSize;
     bool drawShadow; 
     int lineSpaceSize;
     int lineHeight; 
     int offsetY; 
+	
+	//c
+	wstring textwstring;
+	bool bwstring;
+
 };
