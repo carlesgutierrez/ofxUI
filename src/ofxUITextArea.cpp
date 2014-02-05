@@ -26,7 +26,12 @@
 #include "ofxUI.h"
 
 ofxUITextArea::ofxUITextArea(string _name, string _textstring, float w, float h, float x, float y, int _size) : ofxUIWidgetWithLabel()
-{
+{	
+    init(_name, _textstring, w, h, x, y, _size);
+}
+
+ofxUITextArea::ofxUITextArea(string _name, wstring _textstring, float w, float h, float x, float y, int _size) : ofxUIWidgetWithLabel()
+{	
     init(_name, _textstring, w, h, x, y, _size);
 }
 
@@ -45,6 +50,35 @@ void ofxUITextArea::init(string _name, string _textstring, float w, float h, flo
     addEmbeddedWidget(label);
     label->setVisible(drawLabel);
     
+	if(h == 0)
+	{
+        autoSize = true;
+    }
+    else
+    {
+        autoSize = false;
+    }
+	
+	//c
+	bwstring = false;
+}
+
+
+void ofxUITextArea::init(string _name, wstring _textstring, float w, float h, float x, float y, int _size)
+{
+    initRect(x,y,w,h);
+    name = string(_name);
+    kind = OFX_UI_WIDGET_TEXTAREA;
+    textwstring = _textstring;
+    setDrawFill(true);
+    setDrawBack(false);
+    drawShadow = false;
+    drawLabel = false;
+    
+    label = new ofxUILabel(padding*2.0,0,(name+" LABEL"), _size);
+    addEmbeddedWidget(label);
+    label->setVisible(drawLabel);
+    
     if(h == 0)
     {
         autoSize = true;
@@ -53,6 +87,9 @@ void ofxUITextArea::init(string _name, string _textstring, float w, float h, flo
     {
         autoSize = false;
     }
+	
+	//c
+	bwstring = true;
 }
 
 void ofxUITextArea::drawBack()
@@ -103,6 +140,12 @@ void ofxUITextArea::formatTextString()
 {
     float rectWidthLimit = rect->getWidth()-padding*6;
     float rectHeightLimit = rect->getHeight()-label->getLineHeight()-padding;
+	
+	cout << "rectHeightLimit "			<< rectHeightLimit			<< endl;
+	cout << "rect->getHeight() "		<< rect->getHeight()		<< endl;
+	cout << "label->getLineHeight() "	<< label->getLineHeight()	<< endl;
+	cout << "padding "					<< padding					<< endl;	
+	
     bool overheight = false;
     
     lineHeight = label->getStringHeight("1");
@@ -143,11 +186,15 @@ void ofxUITextArea::formatTextString()
                 
                 while (notFound && !overheight)
                 {
+					//c
+					cout << "notFound && !overheight i[" << i << "] searching-> " << &textstring.at(i) << endl;
+					//char real_nes[] = "\82";
+					//|| strncmp(&textstring.at(i), '\82',2)
                     if(strncmp(&textstring.at(i), " ",1) == 0)
                     {
                         tempHeight = (textLines.size()+1)*(lineHeight+lineSpaceSize);
-                        //                        cout << tempHeight << endl;
-                        //                        cout << rectHeightLimit << endl;
+                                                cout << "tempHeight " << tempHeight << endl;
+                                                cout << "rectHeightLimit " << rectHeightLimit << endl;
                         if(!autoSize && tempHeight >= rectHeightLimit)
                         {
                             textLines.push_back(line);

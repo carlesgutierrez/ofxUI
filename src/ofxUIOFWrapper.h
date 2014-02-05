@@ -29,7 +29,14 @@
 
 typedef ofVec3f ofxUIVec3f;
 typedef ofVec2f ofxUIVec2f;
-typedef ofTrueTypeFont ofxUIFont; 
+
+//#ifdef USE_FTGL
+#include "ofxFTGLFont.h"
+typedef ofxFTGLFont ofxUIFont; 
+//#else
+//typedef ofTrueTypeFont ofxUIFont; 
+//#endif
+
 typedef ofColor ofxUIColor;
 
 #if (TARGET_OF_IPHONE) || (TARGET_OF_IOS) || (TARGET_ANDROID)

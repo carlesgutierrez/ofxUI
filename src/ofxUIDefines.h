@@ -224,10 +224,16 @@ enum ofxUIThemeType
     OFX_UI_THEME_MINBLACK
 };
 
+//c
+//#define USE_FTGL
+
 #ifdef TARGET_OF_IOS
     #define OFX_UI_FONT_NAME "GUI/Helvetica.ttf"
+//#elseif USE_FTGL
+	//#define OFX_UI_FONT_NAME "GUI/mplus-1c-regular.ttf"
 #else
-    #define OFX_UI_FONT_NAME "sans-serif"
+	#define OFX_UI_FONT_NAME "GUI/mplus-1c-regular.ttf"
+	//#define OFX_UI_FONT_NAME "sans-serif"
 #endif
 
 #define OFX_UI_FONT_RESOLUTION 150

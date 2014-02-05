@@ -35,6 +35,7 @@ ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float
     initScrollable();
 	//(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size)
 	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, y, OFX_UI_FONT_SMALL);	
+	adjustContendstoGui(false);
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float w, float h, ofxUICanvas *sharedResources) : ofxUICanvas(x,y,w,h,sharedResources)
@@ -42,6 +43,7 @@ ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float
     initScrollable();
 	//(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size)
 	setupScrollBar("S", 0, h, h-20, h, 26, h, x+w, y, OFX_UI_FONT_SMALL);
+	adjustContendstoGui(false);
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas() : ofxUICanvas()
@@ -689,6 +691,18 @@ void ofxUIScrollableSliderCanvas::updateScrollPosition(int max){
 }
 
 //c
+//--------------------------------------------------------------
+void ofxUIScrollableSliderCanvas::adjustContendstoGui(bool _bsnap){
+	
+	if(_bsnap){
+		autoSizeToFitWidgets(); 
+	}
+	else {
+		setSnapping(_bsnap); //Auto damping levels only works for full size window
+		updateScrollBarSize(getScroll()->getWidgets(), 3000 , 500); // set new default size depending contend inside // max , min
+	}
+}
+
 //--------------------------------------------------------------
 void ofxUIScrollableSliderCanvas::guiEvent(ofxUIEventArgs &e)
 {
