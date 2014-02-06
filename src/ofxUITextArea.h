@@ -42,6 +42,8 @@ public:
     void formatTextString();
 	void setParent(ofxUIWidget *_parent);
     void setDrawShadow(bool _drawShadow);
+	
+	wstring toWstring(string text);
     
 protected:    
 	string textstring;

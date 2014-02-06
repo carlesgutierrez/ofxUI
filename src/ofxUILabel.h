@@ -52,6 +52,9 @@ public:
     void drawStringShadow(float x, float y, string _string);
 	
     float getStringWidth(string s);
+	//c
+	float getStringWidth(wstring s);
+	
 	float getStringHeight(string s);
 
     float getLineHeight();

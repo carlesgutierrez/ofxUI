@@ -232,7 +232,7 @@ enum ofxUIThemeType
 //#elseif USE_FTGL
 	//#define OFX_UI_FONT_NAME "GUI/mplus-1c-regular.ttf"
 #else
-	#define OFX_UI_FONT_NAME "GUI/mplus-1c-regular.ttf"
+	#define OFX_UI_FONT_NAME "fonts/arialuni.ttf"
 	//#define OFX_UI_FONT_NAME "sans-serif"
 #endif
 

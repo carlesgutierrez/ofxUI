@@ -136,6 +136,17 @@ void ofxUITextArea::setTextString(string s)
     formatTextString();
 }
 
+//--------------------------------------------------------------
+wstring ofxUITextArea::toWstring(string _text){
+	wstring resultwtext;
+	//convert it to a wstring
+	resultwtext.resize(_text.size());
+	mbstowcs(&resultwtext[0], &_text[0], _text.size());
+	
+	return resultwtext;
+}
+
+
 void ofxUITextArea::formatTextString()
 {
     float rectWidthLimit = rect->getWidth()-padding*6;
@@ -166,18 +177,25 @@ void ofxUITextArea::formatTextString()
         float tempHeight;
         textLines.clear();
         string line = "";
+		line.clear();
         size_t i=0;
         
         while (i < textstring.size() && !overheight) //if not at the end of the string && not over the rect's height
-        {
-            tempWidth = label->getStringWidth(line);
+        {			
+
+            tempWidth = label->getStringWidth(toWstring(line)); // getStringBoundingBox // getStringWidth
+			
             if(tempWidth < rectWidthLimit)
             {
+				//TODO Fisrt cahracter is suspicuous to do brake the code 
+				cout << "Actual Line = "  << line << endl;
                 line+=textstring.at(i);
                 i++;
                 if(i == textstring.size())
                 {
                     textLines.push_back(line);
+					cout << "Final push_back(line)= " << line << endl;
+					for(int j=0;j<textLines.size();j++){cout << "Resume line[" << j << "]=" << textLines[j] << endl;}
                 }
             }
             else
@@ -186,11 +204,18 @@ void ofxUITextArea::formatTextString()
                 
                 while (notFound && !overheight)
                 {
-					//c
-					cout << "notFound && !overheight i[" << i << "] searching-> " << &textstring.at(i) << endl;
-					//char real_nes[] = "\82";
-					//|| strncmp(&textstring.at(i), '\82',2)
-                    if(strncmp(&textstring.at(i), " ",1) == 0)
+					cout << "while notFound && !overheight i[" << i << "] searching-> " << &textstring.at(i) << endl;
+					
+					//This comparisons are not working at all ! LOL !
+					cout << "compare 303= " << (strncmp(&textstring.at(i), "\303",4) == 0) << "is = " << &textstring.at(i) << endl;
+					cout << "compare 345= " << (strncmp(&textstring.at(i), "\345",4) == 0) << "is = " << &textstring.at(i) << endl;
+					cout << "compare 351= " << (strncmp(&textstring.at(i), "\351",4) == 0) << "is = " << &textstring.at(i) << endl;
+					cout << "compare 261= " << (strncmp(&textstring.at(i), "\261",4) == 0) << "is = " << &textstring.at(i) << endl;
+					cout << "compare 123= " << (strncmp(&textstring.at(i), "\261",4) == 0) << "is = " << &textstring.at(i) << endl;
+					cout << "compare 261= " << (strncmp(&textstring.at(i), "\261",4) == 0) << "is = " << &textstring.at(i) << endl;
+					
+					//Go for spaces
+					if(strncmp(&textstring.at(i), " ",1) == 0 )
                     {
                         tempHeight = (textLines.size()+1)*(lineHeight+lineSpaceSize);
                                                 cout << "tempHeight " << tempHeight << endl;
@@ -198,20 +223,54 @@ void ofxUITextArea::formatTextString()
                         if(!autoSize && tempHeight >= rectHeightLimit)
                         {
                             textLines.push_back(line);
+							cout << " ' ' push_back(line)= " << line << endl;
                             textLines[textLines.size()-1]+="...";
                             overheight = true;
                         }
                         notFound = false;
                         if(!overheight)
                         {
-                            textLines.push_back(line);
-                            line.clear();
-                            i++;
+						   textLines.push_back(line);
+							cout << " ' ' push_back(line)= " << line << endl;
+						   line.clear();
+						   i++;
                         }
                     }
+					else if(strncmp(&textstring.at(i), "\303",1) == 0 ){
+						cout << "***is ñ" << endl;
+						cout << "Before to fix line= " << line << endl;
+						line.erase(line.end()-1);
+						i--;
+
+						textLines.push_back(line);
+						line.clear();
+						
+						notFound = false;
+					}
+					else if(strncmp(&textstring.at(i), "\343",1) == 0 || strncmp(&textstring.at(i), "\345",1) == 0 || strncmp(&textstring.at(i), "\351",1)){
+						cout << "***is Japanses character line***" << endl;
+						cout << "Before to fix line= " << line << endl;
+						
+						//fix charcater found
+						//one back
+						if(strncmp(&textstring.at(i), "\343",1) == 0 || strncmp(&textstring.at(i), "\345",1) == 0 || strncmp(&textstring.at(i), "\351",1)){
+							line.erase(line.end()-1);
+							i--;
+							line.erase(line.end()-1);
+							i--;	
+						}
+
+						//save line
+						cout << "Fixed line= " << line << endl;
+						textLines.push_back(line);
+						line.clear();
+						//Stop while	
+						notFound = false;
+					}
                     else
                     {
                         i--;
+						cout << "erasing line size = " << line.size() << "line is =" << line << endl;
                         line.erase(line.end()-1);
                     }
                 }

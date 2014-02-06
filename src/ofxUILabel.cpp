@@ -149,6 +149,11 @@ float ofxUILabel::getStringWidth(string s)
     return font->stringWidth(s);
 }
 
+float ofxUILabel::getStringWidth(wstring s)
+{
+    return font->stringWidth(s);
+}
+
 float ofxUILabel::getStringHeight(string s)
 {
     return font->stringHeight(s);
