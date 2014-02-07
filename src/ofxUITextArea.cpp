@@ -35,12 +35,12 @@ ofxUITextArea::ofxUITextArea(string _name, wstring _textstring, float w, float h
     init(_name, _textstring, w, h, x, y, _size);
 }
 
-void ofxUITextArea::init(string _name, wstring _textstring, float w, float h, float x, float y, int _size)
+void ofxUITextArea::init(string _name, string _textstring, float w, float h, float x, float y, int _size)
 {
     initRect(x,y,w,h);
     name = string(_name);
     kind = OFX_UI_WIDGET_TEXTAREA;
-    textwstring = _textstring;
+    textstring = _textstring;
     setDrawFill(true);
     setDrawBack(false);
     drawShadow = false;
@@ -64,12 +64,12 @@ void ofxUITextArea::init(string _name, wstring _textstring, float w, float h, fl
 }
 
 
-void ofxUITextArea::init(string _name, string _textstring, float w, float h, float x, float y, int _size)
+void ofxUITextArea::init(string _name, wstring _textstring, float w, float h, float x, float y, int _size)
 {
     initRect(x,y,w,h);
     name = string(_name);
     kind = OFX_UI_WIDGET_TEXTAREA;
-    textstring = _textstring;
+    textwstring = _textstring;
     setDrawFill(true);
     setDrawBack(false);
     drawShadow = false;
@@ -123,9 +123,9 @@ void ofxUITextArea::drawFill()
     }
 }
 
-wstring ofxUITextArea::getTextString()
+string ofxUITextArea::getTextString()
 {
-    return textwstring;
+    return textstring;
 }
 
 
@@ -138,25 +138,13 @@ void ofxUITextArea::setTextString(string s)
 
 void ofxUITextArea::formatTextString()
 {
-	
-	//setLineLength
-	ofxUILabel* l =label->getLabelWidget();
-	ofxFTGLSimpleLayout *f;
-	f= l ->ofxUIWidget::getFont();
-	
-	ofxUIRectangle r;
-	r= *l ->ofxUIWidget::getRect();
-	f->setLineLength(rect->getWidth()-10);
-	
-	
-//    float rectWidthLimit = parent->getRect()->getWidth()-padding*6;
     float rectWidthLimit = rect->getWidth()-padding*6;
     float rectHeightLimit = rect->getHeight()-label->getLineHeight()-padding;
 	
-//	cout << "rectHeightLimit "			<< rectHeightLimit			<< endl;
-//	cout << "rect->getHeight() "		<< rect->getHeight()		<< endl;
-//	cout << "label->getLineHeight() "	<< label->getLineHeight()	<< endl;
-//	cout << "padding "					<< padding					<< endl;
+	cout << "rectHeightLimit "			<< rectHeightLimit			<< endl;
+	cout << "rect->getHeight() "		<< rect->getHeight()		<< endl;
+	cout << "label->getLineHeight() "	<< label->getLineHeight()	<< endl;
+	cout << "padding "					<< padding					<< endl;	
 	
     bool overheight = false;
     
@@ -165,11 +153,6 @@ void ofxUITextArea::formatTextString()
     
     offsetY = floor(padding*.125);
     
-//	cout << "*********************************************************" << endl;
-//	cout << "TEXTSTRING width=" << label->getStringWidth(textstring) << endl;;
-//	cout << "rectWidthLimit ="	<< rectWidthLimit	<< endl;
-	
-	
     if(label->getStringWidth(textstring) <= rectWidthLimit)
     {
         if(textstring.size() > 0)
@@ -179,26 +162,15 @@ void ofxUITextArea::formatTextString()
     }
     else
     {
-		/*
         float tempWidth;
         float tempHeight;
         textLines.clear();
         string line = "";
         size_t i=0;
         
-//		cout << "*********************************************************" << endl;
-//		cout << "TEXTSTRING =" << textstring;
-//		cout << "label->getStringWidth() "	<< label->getStringWidth(line)	<< endl;
-		//if it's not at the end of the string && not over the rect's height
-        while (i < textstring.size() && !overheight)
+        while (i < textstring.size() && !overheight) //if not at the end of the string && not over the rect's height
         {
-//				cout << "label->getStringWidth() "	<< label->getStringWidth(line)	<< endl;
-			cout << "*********************************************************" << endl;
-			cout << "TEXTSTRING =" << textstring << endl;
-			cout << "getStringWidth ="	<< label->getStringWidth(line)	<< endl;
-			
             tempWidth = label->getStringWidth(line);
-
             if(tempWidth < rectWidthLimit)
             {
                 line+=textstring.at(i);
@@ -206,89 +178,62 @@ void ofxUITextArea::formatTextString()
                 if(i == textstring.size())
                 {
                     textLines.push_back(line);
-					cout << "*********************************************************" << endl;
-					for(int j=0;j<textLines.size();j++){cout << "line[" << j << "]=" << textLines[j] << endl;}
                 }
             }
             else
             {
-				// if space char is not found
                 bool notFound = true;
-				
-				// while
+                
                 while (notFound && !overheight)
                 {
 					//c
-					//cout << "notFound && !overheight i[" << i << "] searching-> " << &textstring.at(i) << endl;
-
-					cout << "char = "<< i << endl;
-					cout << "searching-> " << &textstring.at(i) << endl;
-					int char_ = strncmp(&textstring.at(i), " ",1);
-					cout << "code = "<< char_ << endl;
-
-					// search for space character
+					cout << "notFound && !overheight i[" << i << "] searching-> " << &textstring.at(i) << endl;
+					//char real_nes[] = "\82";
+					//|| strncmp(&textstring.at(i), '\82',2)
                     if(strncmp(&textstring.at(i), " ",1) == 0)
                     {
                         tempHeight = (textLines.size()+1)*(lineHeight+lineSpaceSize);
                                                 cout << "tempHeight " << tempHeight << endl;
                                                 cout << "rectHeightLimit " << rectHeightLimit << endl;
-
-						// if not in autosize and height greater than rect limit
                         if(!autoSize && tempHeight >= rectHeightLimit)
                         {
                             textLines.push_back(line);
                             textLines[textLines.size()-1]+="...";
                             overheight = true;
                         }
-						//
                         notFound = false;
                         if(!overheight)
                         {
-							// add a line in text area
                             textLines.push_back(line);
                             line.clear();
                             i++;
                         }
                     }
-					// if no space found
-                    else{
-						cout << "lineSize = "<< line.size() << endl;
+                    else
+                    {
                         i--;
                         line.erase(line.end()-1);
                     }
                 }
             }
         }
-		 	*/
     }
-
+    
     if(autoSize)
     {
-//        rect->setHeight((lineHeight+lineSpaceSize)*textLines.size()-lineSpaceSize);
-		ofRectangle rec = f->getStringBoundingBox(textstring, 0, 0);
-		ofxUIRectangle *re = new ofxUIRectangle (rec.x,rec.y, rec.width, rec. height);
-		float lineHeight= f->getLineHeight();
-		rect->setHeight((rec.y*-1)+lineHeight);
-/*		cout << "autosize" << endl;
-		cout << "getStringBoundingBox =" << f->getStringBoundingBox(textstring, 0, 0) << endl;
-		cout << "x =" << rec.x<< endl;
-		cout << "y =" << rec.y<< endl;
-		cout << "width =" << rec.width<< endl;
-		cout << "height =" << rec.height<< endl;
-*/    }
-
+        rect->setHeight((lineHeight+lineSpaceSize)*textLines.size()-lineSpaceSize);
+    }
+    
     if(overheight)
     {
         rect->setHeight(MAX(rect->getHeight(),(lineHeight+lineSpaceSize)*textLines.size()-lineSpaceSize));
-		cout << "overheight" << endl;
     }
-
 }
 
 void ofxUITextArea::setParent(ofxUIWidget *_parent)
 {
     parent = _parent;
-	formatTextString();
+    formatTextString();
     calculatePaddingRect();
 }
 
@@ -296,22 +241,3 @@ void ofxUITextArea::setDrawShadow(bool _drawShadow)
 {
     drawShadow = _drawShadow;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

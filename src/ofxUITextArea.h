@@ -37,12 +37,12 @@ public:
 	void init(string _name, wstring _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_MEDIUM);
     virtual void drawBack();
     virtual void drawFill();
-    wstring getTextString();
+    string getTextString();
 	void setTextString(string s);
     void formatTextString();
 	void setParent(ofxUIWidget *_parent);
     void setDrawShadow(bool _drawShadow);
-		
+    
 protected:    
 	string textstring;
 	
@@ -53,7 +53,7 @@ protected:
     int lineHeight; 
     int offsetY; 
 	
-	// will b needed in windows
+	//c
 	wstring textwstring;
 	bool bwstring;
 
