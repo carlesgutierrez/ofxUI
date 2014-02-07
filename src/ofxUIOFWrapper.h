@@ -31,10 +31,12 @@ typedef ofVec3f ofxUIVec3f;
 typedef ofVec2f ofxUIVec2f;
 
 //#ifdef USE_FTGL
-#include "ofxFTGLFont.h"
-typedef ofxFTGLFont ofxUIFont; 
+//#include "ofxFTGLFont.h"
+//typedef ofxFTGLFont ofxUIFont;
+#include "ofxFTGLSimpleLayout.h"
+typedef ofxFTGLSimpleLayout ofxUIFont;
 //#else
-//typedef ofTrueTypeFont ofxUIFont; 
+//typedef ofTrueTypeFont ofxUIFont;
 //#endif
 
 typedef ofColor ofxUIColor;
