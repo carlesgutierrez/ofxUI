@@ -1934,6 +1934,13 @@ ofxUITextArea* ofxUICanvas::addTextArea(string _name, string _textstring, int _s
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
+//j
+ofxUITextAreaFTGLSimpleLayout* ofxUICanvas::addTextAreaFTGLSimpleLayout(string _name, string _textstring, int _size)
+{
+    ofxUITextAreaFTGLSimpleLayout *widget = new ofxUITextAreaFTGLSimpleLayout(_name, _textstring, rect->getWidth()-widgetSpacing*2, 0, 0, 0, _size);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
 //c
 ofxUITextArea* ofxUICanvas::addTextArea(string _name, wstring _textstring, int _size)
 {

@@ -24,41 +24,37 @@
 
 #pragma once
 
-#include "ofxUILabel.h"
-#include "ofxUIFPS.h"
-#include "ofxUISlider.h"
-//#include "ofxUIMultiSlider.h" //TO DO
-#include "ofxUIImageSlider.h"
-#include "ofxUIFPSSlider.h"
-#include "ofxUIMinimalSlider.h"
-#include "ofxUICircleSlider.h"
-#include "ofxUIBiLabelSlider.h"
-#include "ofxUIRangeSlider.h"
-#include "ofxUIToggle.h"
-#include "ofxUIButton.h"
-#include "ofxUIMultiImageButton.h"
-#include "ofxUIMultiImageToggle.h"
-#include "ofxUIRadio.h"
-#include "ofxUI2DPad.h"
-#include "ofxUI2DGraph.h"
-#include "ofxUITextInput.h"
-#include "ofxUITextArea.h"
-#include "ofxUITextAreaFTGLSimpleLayout.h" //j
-#include "ofxUINumberDialer.h"
-#include "ofxUILabelButton.h"
-#include "ofxUILabelToggle.h"
-#include "ofxUIDragableLabelButton.h"
-#include "ofxUISortableList.h"
-#include "ofxUIToggleMatrix.h"
-#include "ofxUIImageButton.h"
-#include "ofxUIImageToggle.h"
-#include "ofxUIRotarySlider.h"
-#include "ofxUISpacer.h"
-#include "ofxUIDropDownList.h"
-#include "ofxUIWaveform.h"
-#include "ofxUISpectrum.h"
-#include "ofxUIMovingGraph.h"
-#include "ofxUIValuePlotter.h"
-#include "ofxUIImage.h"
-#include "ofxUIBaseDraws.h"
-#include "ofxUIImageSampler.h"
+#include "ofxUIWidgetWithLabel.h"
+#include "ofxUIDefines.h"
+
+class ofxUITextAreaFTGLSimpleLayout : public ofxUIWidgetWithLabel
+{
+public:
+	//c
+    ofxUITextAreaFTGLSimpleLayout(string _name, string _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_MEDIUM);
+	ofxUITextAreaFTGLSimpleLayout(string _name, wstring _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_MEDIUM);
+    void init(string _name, string _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_MEDIUM);
+	void init(string _name, wstring _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_MEDIUM);
+    virtual void drawBack();
+    virtual void drawFill();
+    wstring getTextString();
+	void setTextString(string s);
+    void formatTextString();
+	void setParent(ofxUIWidget *_parent);
+    void setDrawShadow(bool _drawShadow);
+		
+protected:    
+	string textstring;
+	
+    vector<string> textLines;
+    bool autoSize;
+    bool drawShadow; 
+    int lineSpaceSize;
+    int lineHeight; 
+    int offsetY; 
+	
+	// will b needed in windows
+	wstring textwstring;
+	bool bwstring;
+
+};
