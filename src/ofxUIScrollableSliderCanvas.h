@@ -30,8 +30,8 @@ class ofxUIScrollableSliderCanvas : public ofxUICanvas
 {    
 public:    
     ~ofxUIScrollableSliderCanvas();
-    ofxUIScrollableSliderCanvas(float x, float y, float w, float h);
-    ofxUIScrollableSliderCanvas(float x, float y, float w, float h, ofxUICanvas *sharedResources);
+    ofxUIScrollableSliderCanvas(float x, float y, float w, float h, float sliderW);
+//    ofxUIScrollableSliderCanvas(float x, float y, float w, float h, ofxUICanvas *sharedResources);
     ofxUIScrollableSliderCanvas();
     ofxUIScrollableSliderCanvas(ofxUICanvas *sharedResources);
     void initScrollable();
@@ -62,7 +62,7 @@ public:
 	//c
 	void setScrollingDimensions(float _width, float _height, float _widthInternal, float _heightInternal);
     void setMappedScrollPos(float _posScroll);
-	ofVec2f calcHeightContends(vector<ofxUIWidget*> _auxwidgets);
+	ofVec2f calcHeightContents(vector<ofxUIWidget*> _auxwidgets);
 	void updateScrollPosition(int max);
 	void updateScrollBarSize(vector<ofxUIWidget*> _auxwidgets, float maxrange, float minrange);
 	void setupScrollBar(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size);
@@ -83,7 +83,7 @@ public:
 	//c
 	void guiEvent(ofxUIEventArgs &e);
 	ofxUICanvas* getScroll(); // TODO try to find a better name
-	void adjustContendstoGui(bool bsnap = false);
+	void adjustContentstoGui(bool bsnap = false);
 
 
 protected:
@@ -102,7 +102,7 @@ protected:
 	
 	//c
 	float posScrollbar;//Direct scrolling
-	int heightContends;
+	int heightContents;
 	
 	ofxUICanvas *gui_slider;
 };

@@ -921,6 +921,12 @@ void ofxUICanvas::addWidget(ofxUIWidget *widget)
         ofxUILabel *label = (ofxUILabel *) widget;
         setLabelFont(label);
         setWidgetColor(label);
+		
+		////////////////////////////////////////////////////////////////////////// j !
+		ofxFTGLSimpleLayout *f;
+		f= label ->ofxUIWidget::getFont();
+		f->setLineLength(rect->getWidth());
+		
     }
     
     setWidgetDrawingProperties(widget);
@@ -941,7 +947,7 @@ ofxUIWidget* ofxUICanvas::addWidgetPosition(ofxUIWidget *widget, ofxUIWidgetPosi
         switch(position)
         {
             case OFX_UI_WIDGET_POSITION_DOWN:
-                widgetRect->y = lastPaddedRect->getY()+lastPaddedRect->getHeight()-rect->getY()+widgetSpacing;
+                widgetRect->y += lastPaddedRect->getY()+lastPaddedRect->getHeight()-rect->getY()+widgetSpacing;
                 break;
             case OFX_UI_WIDGET_POSITION_UP:
             {
