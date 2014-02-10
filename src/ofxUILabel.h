@@ -78,7 +78,7 @@ public:
     
 protected:    
 	int size;
-	string label; 
+	string label;
     bool autoSize;
     int xOffset, yOffset; 
 }; 

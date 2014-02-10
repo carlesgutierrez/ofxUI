@@ -108,6 +108,7 @@ enum ofxUIWidgetType
     OFX_UI_WIDGET_IMAGESLIDER_V,
     OFX_UI_WIDGET_CUSTOMIMAGEBUTTON,
     OFX_UI_WIDGET_TEXTAREA,
+	OFX_UI_WIDGET_TEXTAREAFTGLSIMPLELAYOUT,
     OFX_UI_WIDGET_CUSTOMWIDGET,
     OFX_UI_WIDGET_BASE_DRAWS,
     OFX_UI_WIDGET_VALUEPLOTTER,
@@ -232,13 +233,14 @@ enum ofxUIThemeType
 //#elseif USE_FTGL
 	//#define OFX_UI_FONT_NAME "GUI/mplus-1c-regular.ttf"
 #else
-	#define OFX_UI_FONT_NAME "fonts/arialuni.ttf"
-	//#define OFX_UI_FONT_NAME "sans-serif"
+//	#define OFX_UI_FONT_NAME "fonts/mplus-1c-regular.ttf"
+	#define OFX_UI_FONT_NAME "fonts/Arial Unicode.ttf"
+//	#define OFX_UI_FONT_NAME "sans-serif"
 #endif
 
-#define OFX_UI_FONT_RESOLUTION 150
-#define OFX_UI_FONT_LARGE_SIZE 10
-#define OFX_UI_FONT_MEDIUM_SIZE 8
-#define OFX_UI_FONT_SMALL_SIZE 6
+#define OFX_UI_FONT_RESOLUTION 144
+#define OFX_UI_FONT_LARGE_SIZE 16
+#define OFX_UI_FONT_MEDIUM_SIZE 14
+#define OFX_UI_FONT_SMALL_SIZE 10
 
 #define OFX_UI_LABEL_DRAW_BACK false
