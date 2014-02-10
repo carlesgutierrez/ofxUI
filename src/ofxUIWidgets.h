@@ -43,7 +43,6 @@
 #include "ofxUI2DGraph.h"
 #include "ofxUITextInput.h"
 #include "ofxUITextArea.h"
-#include "ofxUITextAreaFTGLSimpleLayout.h" //j
 #include "ofxUINumberDialer.h"
 #include "ofxUILabelButton.h"
 #include "ofxUILabelToggle.h"
