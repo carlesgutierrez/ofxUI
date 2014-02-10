@@ -138,6 +138,9 @@ void ofxUITextAreaFTGLSimpleLayout::setTextString(string s)
 
 void ofxUITextAreaFTGLSimpleLayout::formatTextString()
 {
+
+	float rectWidthLimit = rect->getWidth()-padding*6;
+    float rectHeightLimit = rect->getHeight()-label->getLineHeight()-padding;
 	
 	//setLineLength
 	ofxUILabel* l =label->getLabelWidget();
@@ -146,12 +149,8 @@ void ofxUITextAreaFTGLSimpleLayout::formatTextString()
 	
 	ofxUIRectangle r;
 	r= *l ->ofxUIWidget::getRect();
-	f->setLineLength(rect->getWidth()-10);
+	f->setLineLength(rect->getWidth()-padding*6); // if it crashed do padding*something
 	
-	
-//    float rectWidthLimit = parent->getRect()->getWidth()-padding*6;
-    float rectWidthLimit = rect->getWidth()-padding*6;
-    float rectHeightLimit = rect->getHeight()-label->getLineHeight()-padding;
 	
 //	cout << "rectHeightLimit "			<< rectHeightLimit			<< endl;
 //	cout << "rect->getHeight() "		<< rect->getHeight()		<< endl;

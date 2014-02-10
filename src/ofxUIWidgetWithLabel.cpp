@@ -27,7 +27,7 @@
 
 ofxUIWidgetWithLabel::ofxUIWidgetWithLabel() : ofxUIWidget()
 {
-    drawLabel = true; 
+    drawLabel = true;
 }
 
 ofxUIWidgetWithLabel::~ofxUIWidgetWithLabel()

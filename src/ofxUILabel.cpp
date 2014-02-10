@@ -151,7 +151,8 @@ float ofxUILabel::getStringWidth(string s)
 
 float ofxUILabel::getStringHeight(string s)
 {
-    return font->stringHeight(s);
+	return font->getLineHeight();
+//    return font->stringHeight(s);
 }
 
 float ofxUILabel::getLineHeight()
@@ -170,7 +171,8 @@ void ofxUILabel::setLabel(string _label)
     if(autoSize)
     {
         float w = font->stringWidth(label);
-        float h = font->stringHeight("1");          //otherwise we get some funky non-uniform spacing :(
+		float h =  font->getLineHeight()*.7;		//////////////////////j
+//        float h = font->stringHeight("1");          //otherwise we get some funky non-uniform spacing :(
         rect->setWidth(w);
         rect->setHeight(h);
         xOffset = 0;
@@ -182,7 +184,8 @@ void ofxUILabel::setLabel(string _label)
         {
             label = label.substr(0, label.size()-1);
         }
-        float h = (int)font->stringHeight("1");     //otherwise we get some funky non-uniform spacing :(
+		float h =  font->getLineHeight()*.7;
+//        float h = (int)font->stringHeight("1");     //otherwise we get some funky non-uniform spacing :(
         if(rect->getHeight() > 0)
         {
             yOffset = 0;

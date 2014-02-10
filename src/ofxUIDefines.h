@@ -34,8 +34,8 @@
 #define OFX_UI_STATE_SUSTAINED 3
 
 #define OFX_UI_GLOBAL_PADDING 2
-#define OFX_UI_GLOBAL_WIDGET_SPACING 4
-#define OFX_UI_GLOBAL_CANVAS_WIDTH 211
+#define OFX_UI_GLOBAL_WIDGET_SPACING 6
+#define OFX_UI_GLOBAL_CANVAS_WIDTH 411
 #define OFX_UI_GLOBAL_SLIDER_HEIGHT 16
 #define OFX_UI_GLOBAL_SLIDER_WIDTH 25 //c
 #define OFX_UI_GLOBAL_GRAPH_HEIGHT 64
@@ -225,13 +225,8 @@ enum ofxUIThemeType
     OFX_UI_THEME_MINBLACK
 };
 
-//c
-//#define USE_FTGL
-
 #ifdef TARGET_OF_IOS
     #define OFX_UI_FONT_NAME "GUI/Helvetica.ttf"
-//#elseif USE_FTGL
-	//#define OFX_UI_FONT_NAME "GUI/mplus-1c-regular.ttf"
 #else
 //	#define OFX_UI_FONT_NAME "fonts/mplus-1c-regular.ttf"
 	#define OFX_UI_FONT_NAME "fonts/Arial Unicode.ttf"
@@ -239,8 +234,8 @@ enum ofxUIThemeType
 #endif
 
 #define OFX_UI_FONT_RESOLUTION 144
-#define OFX_UI_FONT_LARGE_SIZE 16
-#define OFX_UI_FONT_MEDIUM_SIZE 14
-#define OFX_UI_FONT_SMALL_SIZE 10
+#define OFX_UI_FONT_LARGE_SIZE 14
+#define OFX_UI_FONT_MEDIUM_SIZE 8
+#define OFX_UI_FONT_SMALL_SIZE 6
 
 #define OFX_UI_LABEL_DRAW_BACK false

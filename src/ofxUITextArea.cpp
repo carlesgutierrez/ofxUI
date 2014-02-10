@@ -138,17 +138,17 @@ void ofxUITextArea::setTextString(string s)
 
 void ofxUITextArea::formatTextString()
 {
+	//	ofxUIRectangle r;
+	//	r= *label ->ofxUIWidget::getRect();
+	font= label->getFont();
+	font->setLineLength(rect->getWidth()-padding*6); // if it crashed do padding*something
+	
     float rectWidthLimit = rect->getWidth()-padding*6;
     float rectHeightLimit = rect->getHeight()-label->getLineHeight()-padding;
-	
-	cout << "rectHeightLimit "			<< rectHeightLimit			<< endl;
-	cout << "rect->getHeight() "		<< rect->getHeight()		<< endl;
-	cout << "label->getLineHeight() "	<< label->getLineHeight()	<< endl;
-	cout << "padding "					<< padding					<< endl;	
-	
     bool overheight = false;
     
-    lineHeight = label->getStringHeight("1");
+//    lineHeight = label->getStringHeight("1");
+	lineHeight = font->getLineHeight()*.7;
     lineSpaceSize = padding*2;
     
     offsetY = floor(padding*.125);
@@ -160,6 +160,7 @@ void ofxUITextArea::formatTextString()
             textLines.push_back(textstring);
         }
     }
+	/*
     else
     {
         float tempWidth;
@@ -217,11 +218,16 @@ void ofxUITextArea::formatTextString()
                 }
             }
         }
+	 
     }
-    
+    */
     if(autoSize)
     {
-        rect->setHeight((lineHeight+lineSpaceSize)*textLines.size()-lineSpaceSize);
+//        rect->setHeight((lineHeight+lineSpaceSize)*textLines.size()-lineSpaceSize);
+		
+		ofRectangle rec = font->getStringBoundingBox(textstring, 0, 0);
+		ofxUIRectangle *re = new ofxUIRectangle (rec.x,rec.y, rec.width, rec. height);
+		rect->setHeight((rec.y*-1)+lineHeight);
     }
     
     if(overheight)
