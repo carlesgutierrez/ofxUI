@@ -103,6 +103,9 @@ public:
     virtual void clearEmbeddedWidgets();
     virtual int getEmbeddedWidgetsSize();
     ofxUIWidget *getEmbeddedWidget(int index);
+
+    //c
+    virtual int getState();
     
     virtual void setState(int _state);
     virtual void setFont(ofxUIFont *_font);
