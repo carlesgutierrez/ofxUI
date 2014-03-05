@@ -53,6 +53,7 @@ public:
 	void setAutoClear(bool _autoclear);
     void setAutoUnfocus(bool _autoUnfocus);
     void setOnlyNumericInput(bool _onlyNumericInput);
+	void setOnlyDataInput(bool _onlyDataInput);
     bool isFocused();
     void setFocus(bool _focus); 
     void setTriggerOnClick(bool _triggerOnClick);
@@ -68,6 +69,7 @@ protected:
 	string defaultstring; 
     string displaystring;
     bool onlyNumericInput;
+	bool onlyDataInput;
 	bool clicked;
     bool autoUnfocus; 
 	float theta; 
