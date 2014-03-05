@@ -25,56 +25,87 @@
 #pragma once
 
 #include "ofxUIWidgetWithLabel.h"
-#include "ofxUIDefines.h"
 
-class ofxUITextInput : public ofxUIWidgetWithLabel
+class ofxUI3DPad : public ofxUIWidgetWithLabel
 {
 public:
-    ofxUITextInput(string _name, string _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
-    void init(string _name, string _textstring, float w, float h = 0, float x = 0, float y = 0, int _size = OFX_UI_FONT_SMALL);
+	
+    ofxUI3DPad(string _name,
+			   ofxUIVec3f _rangeX,
+			   ofxUIVec3f _rangeY,
+			   ofxUIVec3f _rangeZ,
+			   ofxUIVec3f _value,
+			   float w,
+			   float h,
+			   float x = 0,
+			   float y = 0,
+			   ofxUI3DPadViewPoint _vP = OFX_UI_FRONT);
+	
+    ofxUI3DPad(string _name,
+			   ofxUIVec3f _rangeX,
+			   ofxUIVec3f _rangeY,
+			   ofxUIVec3f _rangeZ,
+			   ofxUIVec3f *_value,
+			   float w,
+			   float h,
+			   float x = 0,
+			   float y = 0,
+			   ofxUI3DPadViewPoint _vP = OFX_UI_FRONT);
+	
+    ~ofxUI3DPad();
+    
+	void init(string _name,
+			  ofxUIVec3f _rangeX,
+			  ofxUIVec3f _rangeY,
+			  ofxUIVec3f _rangeZ,
+			  ofxUIVec3f *_value,
+			  float w,
+			  float h,
+			  float x = 0,
+			  float y = 0,
+			  ofxUI3DPadViewPoint _vP = OFX_UI_FRONT);
+	
+    virtual void update();
     virtual void setDrawPadding(bool _draw_padded_rect);
     virtual void setDrawPaddingOutline(bool _draw_padded_rect_outline);
     virtual void drawFill();
+    virtual void drawFillHighlight();
+    float getIncrement();
+    void setIncrement(float _increment);
     void mouseMoved(int x, int y);
     void mouseDragged(int x, int y, int button);
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
     void keyPressed(int key);
-    void unClick();
+	void input(float x, float y);
+    void updateValueRef();
+	void updateLabel();
     void stateChange();
-	bool isClicked();
-	string getTextString();
-    void setInputTriggerType(int _triggerType);
-    int getInputTriggerType();
-	void setTextString(string s);
-	void setParent(ofxUIWidget *_parent);
-	void setAutoClear(bool _autoclear);
-    void setAutoUnfocus(bool _autoUnfocus);
-    bool isFocused();
-    void setFocus(bool _focus); 
-    void setTriggerOnClick(bool _triggerOnClick);
-    void recalculateDisplayString();
+	void setValue(ofxUIVec3f _value);
+	ofxUIVec3f getValue();
+	ofxUIVec3f getPercentValue();
+	ofxUIVec3f getScaledValue();
+    bool isDraggable();
+    void setLabelPrecision(int _precision);
+	void setViewPoint(ofxUI3DPadViewPoint _vP);
+	ofxUI3DPadViewPoint getViewPoint();
     bool hasState(){ return true; };
 #ifndef OFX_UI_NO_XML
     virtual void saveState(ofxXmlSettings *XML);
     virtual void loadState(ofxXmlSettings *XML);
-#endif    
+#endif
 
+	
 protected:
-	string textstring; 
-	string defaultstring; 
-    string displaystring; 
-	bool clicked;
-    bool autoUnfocus; 
-	float theta; 
-	float cursorWidth; 
-	float spaceOffset;		
-	bool autoclear; 
-	float defaultY, defaultX; 	
-	int inputTriggerType;
-    int maxsize;
-    bool triggerOnClick;
-    
-    unsigned int cursorPosition;
-    unsigned int firstVisibleCharacterIndex;
+	ofxUIVec3f value;
+	ofxUIVec3f *valueRef;     
+    float increment;
+    int labelPrecision;     
+    bool useReference; 
+    ofxUIVec3f rangeX, rangeY, rangeZ;
+	
+	ofxUI3DPadViewPoint vP;
+	
+	void drawPad();
+	
 }; 

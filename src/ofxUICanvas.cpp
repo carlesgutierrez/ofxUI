@@ -55,6 +55,137 @@ ofxUICanvas::~ofxUICanvas()
     widgets.clear();
 }
 
+// Copy constructor to handle heap allocation during a copy.
+ofxUICanvas::ofxUICanvas(const ofxUICanvas &other)
+: bInsideCanvas(other.bInsideCanvas),
+state(other.state),
+hasSharedResources(other.hasSharedResources),
+autoDraw(other.autoDraw),
+autoUpdate(other.autoUpdate),
+widgets_map(other.widgets_map),
+widgets(other.widgets),
+widgetsAreModal(other.widgetsAreModal),
+widgetsWithState(other.widgetsWithState),
+lastAddeds(other.lastAddeds),
+activeFocusedWidget(other.activeFocusedWidget),
+enable_highlight_outline(other.enable_highlight_outline),
+enable_highlight_fill(other.enable_highlight_fill),
+enabled(other.enabled),
+bTriggerWidgetsUponLoad(other.bTriggerWidgetsUponLoad),
+uniqueIDs(other.uniqueIDs),
+hasKeyBoard(other.hasKeyBoard),
+widgetSpacing(other.widgetSpacing),
+globalCanvasWidth(other.globalCanvasWidth),
+globalSliderHeight(other.globalSliderHeight),
+globalGraphHeight(other.globalGraphHeight),
+globalButtonDimension(other.globalButtonDimension),
+globalSpacerHeight(other.globalSpacerHeight),
+fontName(other.fontName),
+widgetPosition(other.widgetPosition),
+widgetAlign(other.widgetAlign),
+widgetFontSize(other.widgetFontSize),
+widget_color_back(other.widget_color_back),
+widget_color_outline(other.widget_color_outline),
+widget_color_outline_highlight(other.widget_color_outline_highlight),
+widget_color_fill(other.widget_color_fill),
+widget_color_fill_highlight(other.widget_color_fill_highlight),
+widget_color_padded_rect(other.widget_color_padded_rect),
+widget_color_padded_rect_outline(other.widget_color_padded_rect_outline),
+bDrawWidgetPadding(other.bDrawWidgetPadding),
+bDrawWidgetPaddingOutline(other.bDrawWidgetPaddingOutline)
+{
+    if (other.font_large) {
+        font_large = new ofxUIFont(*other.font_large);
+    }
+    else {
+        font_large = NULL;
+    }
+    if (other.font_medium) {
+        font_medium = new ofxUIFont(*other.font_medium);
+    }
+    else {
+        font_medium = NULL;
+    }
+    if (other.font_small) {
+        font_small = new ofxUIFont(*other.font_small);
+    }
+    else {
+        font_small = NULL;
+    }
+    if (other.GUIevent) {
+        GUIevent = new ofxUIEventArgs(*other.GUIevent);
+    }
+    else {
+        GUIevent = NULL;
+    }
+}
+
+// Assignment operator to handle heap allocation during assignment.
+ofxUICanvas& ofxUICanvas::operator=(const ofxUICanvas &other)
+{
+    bInsideCanvas = other.bInsideCanvas;
+    state = other.state;
+    hasSharedResources = other.hasSharedResources;
+    autoDraw = other.autoDraw;
+    autoUpdate = other.autoUpdate;
+    widgets_map = other.widgets_map;
+    widgets = other.widgets;
+    widgetsAreModal = other.widgetsAreModal;
+    widgetsWithState = other.widgetsWithState;
+    lastAddeds = other.lastAddeds;
+    activeFocusedWidget = other.activeFocusedWidget;
+    enable_highlight_outline = other.enable_highlight_outline;
+    enable_highlight_fill = other.enable_highlight_fill;
+    enabled = other.enabled;
+    bTriggerWidgetsUponLoad = other.bTriggerWidgetsUponLoad;
+    uniqueIDs = other.uniqueIDs;
+    hasKeyBoard = other.hasKeyBoard;
+    widgetSpacing = other.widgetSpacing;
+    globalCanvasWidth = other.globalCanvasWidth;
+    globalSliderHeight = other.globalSliderHeight;
+    globalGraphHeight = other.globalGraphHeight;
+    globalButtonDimension = other.globalButtonDimension;
+    globalSpacerHeight = other.globalSpacerHeight;
+    fontName = other.fontName;
+    widgetPosition = other.widgetPosition;
+    widgetAlign = other.widgetAlign;
+    widgetFontSize = other.widgetFontSize;
+    widget_color_back = other.widget_color_back;
+    widget_color_outline = other.widget_color_outline;
+    widget_color_outline_highlight = other.widget_color_outline_highlight;
+    widget_color_fill = other.widget_color_fill;
+    widget_color_fill_highlight = other.widget_color_fill_highlight;
+    widget_color_padded_rect = other.widget_color_padded_rect;
+    widget_color_padded_rect_outline = other.widget_color_padded_rect_outline;
+    bDrawWidgetPadding = other.bDrawWidgetPadding;
+    bDrawWidgetPaddingOutline = other.bDrawWidgetPaddingOutline;
+    if (other.font_large) {
+        font_large = new ofxUIFont(*other.font_large);
+    }
+    else {
+        font_large = NULL;
+    }
+    if (other.font_medium) {
+        font_medium = new ofxUIFont(*other.font_medium);
+    }
+    else {
+        font_medium = NULL;
+    }
+    if (other.font_small) {
+        font_small = new ofxUIFont(*other.font_small);
+    }
+    else {
+        font_small = NULL;
+    }
+    if (other.GUIevent) {
+        GUIevent = new ofxUIEventArgs(*other.GUIevent);
+    }
+    else {
+        GUIevent = NULL;
+    }
+    return *this;
+}
+
 ofxUICanvas::ofxUICanvas(ofxUIRectangle r) : ofxUIWidget()
 {
     init(r.getX(false), r.getY(false), r.width, r.height);
@@ -281,12 +412,13 @@ void ofxUICanvas::setFontSize(ofxUIWidgetFontType _kind, int _size, int _resolut
                 delete font_large;
             }
             font_large = new ofxUIFont();
-			//string filename, float fontsize, float depth, bool bUsePolygons
-			//vs
-			//string filename, int fontsize, bool _bAntiAliased=true, bool _bFullCharacterSet=false, bool makeContours=false, float simplifyAmt=0.3, int dpi=0
 
-            font_large->loadFont(fontName, _size);//, true, true, false, 0.0,_resolution);
-            break;
+#ifdef USE_FTGL
+            font_large->loadFont(fontName, _size, true, true);//, false, 0.0,_resolution);
+#else
+			font_large->loadFont(fontName, _size, true, true, false, 0.0,_resolution);
+#endif
+			break;
             
         case OFX_UI_FONT_MEDIUM:
             if(font_medium != NULL)
@@ -294,7 +426,13 @@ void ofxUICanvas::setFontSize(ofxUIWidgetFontType _kind, int _size, int _resolut
                 delete font_medium;
             }
             font_medium = new ofxUIFont();
-            font_medium->loadFont(fontName,_size);//,true, true, false, 0.0,_resolution);
+
+#ifdef USE_FTGL
+            font_medium->loadFont(fontName,_size, true, true);//, false, 0.0,_resolution);
+#else
+            font_medium->loadFont(fontName,_size, true, true, false, 0.0,_resolution);
+#endif
+
             break;
             
         case OFX_UI_FONT_SMALL:
@@ -303,7 +441,12 @@ void ofxUICanvas::setFontSize(ofxUIWidgetFontType _kind, int _size, int _resolut
                 delete font_small;
             }
             font_small = new ofxUIFont();
-            font_small->loadFont(fontName,_size);//,true, true, false, 0.0,_resolution);
+
+#ifdef USE_FTGL
+            font_small->loadFont(fontName,_size, true, true);//, false, 0.0,_resolution);
+#else
+            font_small->loadFont(fontName,_size, true, true, false, 0.0,_resolution);
+#endif
             break;
     }
 }
@@ -375,6 +518,7 @@ void ofxUICanvas::disable()
 
 void ofxUICanvas::update()
 {
+    if (!isVisible()) { return; } // Custom to save framerate
     for(vector<ofxUIWidget *>::iterator it = widgets.begin(); it != widgets.end(); ++it)
     {
         (*it)->update();
@@ -820,13 +964,19 @@ void ofxUICanvas::removeWidgets()
         ofxUIWidget *w = (*it);
         delete w;
     }
+    clearWidgets();
+    resetPlacer();
+}
+
+// To be called before destructor if "widgets" are pointing to stack-based widgets.
+void ofxUICanvas::clearWidgets()
+{
     widgets.clear();
     widgets_map.clear();
     widgetsAreModal.clear();
     widgetsWithState.clear();
     lastAddeds.clear();
     activeFocusedWidget = NULL;
-    resetPlacer();
 }
 
 void ofxUICanvas::removeWidget(ofxUIWidget *widget)
@@ -882,7 +1032,7 @@ void ofxUICanvas::removeWidget(ofxUIWidget *widget)
     
     if(widget->hasLabel())
     {
-        //            cout << "HAS LABEL" << endl;
+//		cout << "HAS LABEL" << endl;
         ofxUIWidgetWithLabel *wwl = (ofxUIWidgetWithLabel *) widget;
         ofxUILabel *label = wwl->getLabelWidget();
         removeWidget(label);
@@ -890,14 +1040,16 @@ void ofxUICanvas::removeWidget(ofxUIWidget *widget)
     
     for(int i = 0; i < widget->getEmbeddedWidgetsSize(); i++)
     {
-        removeWidget(widget->getEmbeddedWidget(i));
+// NeuroTwitter:
+// diasble this functions to properly remove dropDownLists
+//        removeWidget(widget->getEmbeddedWidget(i));
     }
-    widget->clearEmbeddedWidgets();
+//    widget->clearEmbeddedWidgets();
     
     //	remove widget from lastAdded stack
     lastAddeds.erase( std::remove( lastAddeds.begin(), lastAddeds.end(), widget ), lastAddeds.end() );
     
-    delete widget;
+    //delete widget;
 }
 
 void ofxUICanvas::addWidget(ofxUIWidget *widget)
@@ -1518,6 +1670,37 @@ ofxUI2DPad* ofxUICanvas::add2DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _
 ofxUI2DPad* ofxUICanvas::add2DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f *_value, float w, float h, float x, float y)
 {
     ofxUI2DPad* widget = new ofxUI2DPad(_name, _rangeX, _rangeY, _value, w, h, x, y);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+
+ofxUI3DPad* ofxUICanvas::add3DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f _rangeZ, ofxUIVec3f _value, ofxUI3DPadViewPoint _vP)
+{
+    float dim = rect->getWidth()-widgetSpacing*2;
+    ofxUI3DPad* widget = new ofxUI3DPad(_name, _rangeX, _rangeY, _rangeZ, _value, dim, dim, 0, 0, _vP);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+
+
+ofxUI3DPad* ofxUICanvas::add3DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f _rangeZ, ofxUIVec3f _value, float w, float h, float x, float y, ofxUI3DPadViewPoint _vP)
+{
+    ofxUI3DPad* widget = new ofxUI3DPad(_name, _rangeX, _rangeY, _rangeZ, _value, w, h, x, y, _vP);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+
+ofxUI3DPad* ofxUICanvas::add3DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f _rangeZ, ofxUIVec3f *_value, ofxUI3DPadViewPoint _vP)
+{
+    float dim = rect->getWidth()-widgetSpacing*2;
+    ofxUI3DPad* widget = new ofxUI3DPad(_name, _rangeX, _rangeY, _rangeZ, _value, dim, dim, 0, 0, _vP);
+    addWidgetPosition(widget, widgetPosition, widgetAlign);
+    return widget;
+}
+
+ofxUI3DPad* ofxUICanvas::add3DPad(string _name, ofxUIVec3f _rangeX, ofxUIVec3f _rangeY, ofxUIVec3f _rangeZ, ofxUIVec3f *_value, float w, float h, float x, float y, ofxUI3DPadViewPoint _vP)
+{
+    ofxUI3DPad* widget = new ofxUI3DPad(_name, _rangeX, _rangeY, _rangeZ, _value, w, h, x, y, _vP);
     addWidgetPosition(widget, widgetPosition, widgetAlign);
     return widget;
 }
@@ -2879,6 +3062,7 @@ void ofxUICanvas::removeWidget(string _name)
     if(w != NULL)
     {
         removeWidget(w);
+		delete w;
     }
 }
 
@@ -3002,7 +3186,11 @@ bool ofxUICanvas::updateFont(ofxUIWidgetFontType _kind, string filename, int fon
                 delete font_large;
             }
             font_large = new ofxUIFont();
-            success = font_large->loadFont(filename,fontsize);//,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+#ifdef USE_FTGL
+			success = font_large->loadFont(filename,fontsize,_bAntiAliased, _bFullCharacterSet);//, makeContours, simplifyAmt,dpi);
+#else
+			success = font_large->loadFont(filename,fontsize,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+#endif
             break;
             
         case OFX_UI_FONT_MEDIUM:
@@ -3011,7 +3199,11 @@ bool ofxUICanvas::updateFont(ofxUIWidgetFontType _kind, string filename, int fon
                 delete font_medium;
             }
             font_medium = new ofxUIFont();
-            success = font_medium->loadFont(filename,fontsize);//,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+#ifdef USE_FTGL
+			success = font_medium->loadFont(filename,fontsize);//,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+#else
+			success = font_medium->loadFont(filename,fontsize,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+#endif
             break;
             
         case OFX_UI_FONT_SMALL:
@@ -3020,7 +3212,11 @@ bool ofxUICanvas::updateFont(ofxUIWidgetFontType _kind, string filename, int fon
                 delete font_small;
             }
             font_small = new ofxUIFont();
-            success = font_small->loadFont(filename,fontsize);//,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+#ifdef USE_FTGL
+			success = font_small->loadFont(filename,fontsize);//,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+#else
+			success = font_small->loadFont(filename,fontsize,_bAntiAliased, _bFullCharacterSet, makeContours, simplifyAmt,dpi);
+#endif
             break;
     }
     return success;
@@ -3031,35 +3227,10 @@ void ofxUICanvas::checkForKeyFocus(ofxUIWidget *child)
     if(child->getKind() == OFX_UI_WIDGET_TEXTINPUT)
     {
         ofxUITextInput *textinput = (ofxUITextInput *) child;
-        switch(textinput->getTriggerType())
+        if(textinput->isFocused())
         {
-            case OFX_UI_TEXTINPUT_ON_FOCUS:
-            {
-                hasKeyBoard = true;
-                return;
-            }
-                break;
-                
-            case OFX_UI_TEXTINPUT_ON_ENTER:
-            {
-                hasKeyBoard = false;
-                return;
-            }
-                break; 
-                
-            case OFX_UI_TEXTINPUT_ON_UNFOCUS:
-            {
-                hasKeyBoard = false; 
-                return;
-            }
-                break; 
-                
-            default:
-            {
-                hasKeyBoard = false; 
-                return; 
-            }
-                break;                     
+            hasKeyBoard = true;
+            return;        
         }
     }        
     hasKeyBoard = false;

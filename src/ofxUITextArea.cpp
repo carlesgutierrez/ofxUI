@@ -38,8 +38,9 @@ ofxUITextArea::ofxUITextArea(string _name, wstring _textstring, float w, float h
 void ofxUITextArea::init(string _name, string _textstring, float w, float h, float x, float y, int _size)
 {
     initRect(x,y,w,h);
-    name = string(_name);
-    kind = OFX_UI_WIDGET_TEXTAREA;
+    setName(_name);
+    setKind(OFX_UI_WIDGET_TEXTAREA);
+    
     textstring = _textstring;
     setDrawFill(true);
     setDrawBack(false);
@@ -236,11 +237,41 @@ void ofxUITextArea::formatTextString()
     }
 }
 
+void ofxUITextArea::formatFTGLTextString()
+{
+	
+    font = label->getFont();
+    font->setLineLength(rect->getWidth()-padding*6);	//NOT SURE WHY 6...
+//	font->setLineLength(rect->getWidth()-padding);
+
+//	lineHeight = label->getStringHeight("1");
+    lineHeight = font->getLineHeight()*.7;
+    lineSpaceSize = padding*2;
+	offsetY = floor(padding*.125);
+
+	textLines.push_back(textstring);
+
+	if(autoSize)
+    {
+//		rect->setHeight((lineHeight+lineSpaceSize)*textLines.size()-lineSpaceSize); //originally
+        ofRectangle rec = font->getStringBoundingBox(textstring, 0, 0);
+        rect->setHeight((rec.y*-1)+lineHeight);
+    }
+	
+}
+
 void ofxUITextArea::setParent(ofxUIWidget *_parent)
 {
+#ifndef USE_FTGL
     parent = _parent;
     formatTextString();
     calculatePaddingRect();
+#else
+    parent = _parent;
+	formatFTGLTextString();
+    calculatePaddingRect();
+#endif
+
 }
 
 void ofxUITextArea::setDrawShadow(bool _drawShadow)

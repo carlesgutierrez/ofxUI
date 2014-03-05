@@ -26,20 +26,29 @@
 
 #include "ofMain.h"
 #include "ofPoint.h"
+#include "ofxFTGLSimpleLayout.h"
+
+#define USE_FTGL
+
+#ifndef OFX_UI_FONT_RENDERER
+#ifdef USE_FTGL
+#define OFX_UI_FONT_RENDERER ofxFTGLSimpleLayout
+#else
+#define OFX_UI_FONT_RENDERER ofTrueTypeFont
+#endif
+#endif
+
+
+//#ifndef OFX_UI_FONT_RENDERER
+//#define OFX_UI_FONT_RENDERER ofTrueTypeFont
+//#endif
 
 typedef ofVec3f ofxUIVec3f;
 typedef ofVec2f ofxUIVec2f;
-
-//#ifdef USE_FTGL
-	#include "ofxFTGLSimpleLayout.h"
-	typedef ofxFTGLSimpleLayout ofxUIFont;
-//#else
-//typedef ofTrueTypeFont ofxUIFont;
-//#endif
-
+typedef OFX_UI_FONT_RENDERER ofxUIFont;
 typedef ofColor ofxUIColor;
 
-#if (TARGET_OF_IPHONE) || (TARGET_OF_IOS) || (TARGET_ANDROID)
+#if defined( TARGET_OF_IPHONE ) || defined( TARGET_OF_IOS ) || defined( TARGET_ANDROID )
     #define OFX_UI_TARGET_TOUCH
 #endif
 

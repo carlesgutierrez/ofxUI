@@ -28,12 +28,13 @@
 ofxUIScrollableSliderCanvas::~ofxUIScrollableSliderCanvas()
 {
     delete sRect;
+	delete FBORect;
 }
 
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float w, float h, float sliderW) : ofxUICanvas(x,y,w,h)
 {
     initScrollable();
-	setupScrollBar("S",			// string _name,
+	setupScrollBar("S",		// string _name,
 				   0,			// float _min,
 				   h,			// float _max,
 				   0,			// int _lowvalue,
@@ -41,28 +42,11 @@ ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float
 				   sliderW,		// int _w,
 				   h,			// int _h,
 				   x+w,			// int _x,
-				   y,			// int yw,
+				   y,			// int _y,
 				   OFX_UI_FONT_SMALL);
 	adjustContentstoGui(false);
 }
-/*
-ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas(float x, float y, float w, float h, ofxUICanvas *sharedResources) : ofxUICanvas(x,y,w,h,sharedResources)
-{
-    initScrollable();
-	setupScrollBar("S",			// string _name,
-				   0,			// float _min,
-				   h,			// float _max,
-				   h-20,		// int _lowvalue,
-				   h,			// int _highvalue,
-				   26,			// int _w,
-				   h,			// int _h,
-				   x+w,			// int _x,
-				   y,			// int yw,
-				   OFX_UI_FONT_SMALL);
-	adjustContentstoGui(false);
 
-}
-*/
 ofxUIScrollableSliderCanvas::ofxUIScrollableSliderCanvas() : ofxUICanvas()
 {
     initScrollable();
@@ -81,6 +65,7 @@ void ofxUIScrollableSliderCanvas::initScrollable()
 {
     kind = OFX_UI_WIDGET_SCROLLABLECANVAS;
     sRect = new ofxUIRectangle(rect->x, rect->y, rect->getWidth(), rect->getHeight());	
+	FBORect = new ofxUIRectangle();
 	
     paddedRect->setParent(sRect);
     isScrolling = false;
@@ -96,11 +81,13 @@ void ofxUIScrollableSliderCanvas::initScrollable()
     nearBot = false;
     nearRight = false;
     nearLeft = false;
-    
+	
     hitWidget = false;
     stickyDistance = 32;
     hit = false;
     snapping = true;
+	
+	bFBO=false;
 #ifdef OFX_UI_TARGET_TOUCH
     touchId = -1;
 #endif
@@ -109,8 +96,18 @@ void ofxUIScrollableSliderCanvas::initScrollable()
 void ofxUIScrollableSliderCanvas::setupScrollBar(string _name, float _min, float _max, int _lowvalue, int _highvalue, int _w, int _h, int _x, int _y, int _size){
 
 	gui_slider = new ofxUICanvas(_x, _y, _w, _h);
-	gui_slider->setPadding(0);
-	gui_slider->addWidgetRight(new ofxUIScrollSlider(_name, _min, _max, _lowvalue, _highvalue, _w - OFX_UI_GLOBAL_WIDGET_SPACING*2, _h - OFX_UI_GLOBAL_WIDGET_SPACING*2, _x, _y, OFX_UI_FONT_SMALL));
+	float spacing = 0.1;
+	gui_slider->setWidgetSpacing(spacing);
+	gui_slider->addWidgetRight(new ofxUIScrollSlider(_name,
+													 _min,
+													 _max,
+													 _lowvalue,
+													 _highvalue,
+													 _w - spacing*2,
+													 _h - spacing*2,
+													 _x,
+													 _y,
+													 OFX_UI_FONT_SMALL));
 
 	gui_slider->setDrawPaddingOutline(false);
 	
@@ -135,6 +132,24 @@ void ofxUIScrollableSliderCanvas::setScrollArea(float x, float y, float w, float
     sRect->setHeight(h);
     paddedRect->setWidth(w+padding*2);
     paddedRect->setHeight(h+padding*2);
+}
+
+void ofxUIScrollableSliderCanvas::setFBOArea(float x, float y, float w, float h)
+{
+	bFBO=true;
+    FBORect->x = x;
+    FBORect->y = y;
+    FBORect->setWidth(w);
+    FBORect->setHeight(h);
+	
+	fbo.allocate(FBORect->getWidth(),  FBORect->getHeight(), GL_RGBA,0);
+	gui_slider->setPosition(x+w, y);
+	
+	// draw canvas(inside fbo) on 0,0 because the fbo will draw on position.
+	sRect->x = 0;
+    sRect->y = 0;
+	rect->x=0;
+	rect->y=0;
 }
 
 void ofxUIScrollableSliderCanvas::setScrollAreaToScreen()
@@ -379,8 +394,37 @@ void ofxUIScrollableSliderCanvas::drawPaddedOutline()
 
 void ofxUIScrollableSliderCanvas::draw()
 {
+	
+	if (bFBO) {
+		fbo.begin();
+		/*
+		 OK this is a very ugly hack..
+		 this color is half of the double of the back color (50) which is 75.
+		 it is very hard to get around this problem:
+		 http://forum.openframeworks.cc/t/fbo-problems-with-alpha/1643/10
+		 http://forum.openframeworks.cc/t/weird-problem-rendering-semi-transparent-image-to-fbo/2215/4
+		 
+		 Some tests:
+		 left value: OFX_UI_COLOR_BACK_ALPHA 100
+		 right value: equivalent in ofClear();
+		 (this only works when ofBackground is default)
+		 0      200
+		 20     184
+		 50     158
+		 100    108
+		 150    59
+		 180    35
+		 200    20
+		 255    20
+		 */
+		
+		
+        ofClear(40);
+        ofClearAlpha();
+	}
+	
     ofxUIPushStyle();
-    
+	
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
@@ -403,16 +447,30 @@ void ofxUIScrollableSliderCanvas::draw()
     
     for(vector<ofxUIWidget *>::reverse_iterator it = widgets.rbegin(); it != widgets.rend(); ++it)
     {
-        if((*it)->isVisible() && (*it)->getRect()->rInside(*sRect))
-        {
-            (*it)->draw();
-        }
+		if (bFBO) {
+			// Do not test if inside.. otherwise the widgets will disapear again.
+			if((*it)->isVisible())// && (*it)->getRect()->rInside(*sRect))
+			{
+				(*it)->draw();
+			}
+		}else{
+			if((*it)->isVisible() && (*it)->getRect()->rInside(*sRect))
+			{
+				(*it)->draw();
+			}
+		}
     }
-    
+
     ofxUIPopStyle();
 	
-	//draw scroll bar
-	gui_slider->draw();
+	if (bFBO) {
+		fbo.end();
+
+		ofDisableAlphaBlending();
+		ofSetColor(255);
+		fbo.draw(FBORect->getX(), FBORect->getY());
+	}
+	ofEnableAlphaBlending();
 }
 
 void ofxUIScrollableSliderCanvas::setPosition(int x, int y)
@@ -701,7 +759,7 @@ void ofxUIScrollableSliderCanvas::updateScrollPosition(int max){
 		float posmap = ofxUIMap(posScrollbar, 0, 1, +sRect->y, -sizeHContent+max+sRect->y, true); 
 		
 		//finally move the canvas to direct pos finded between the maximum and minimum
-		rect->y = posmap;		
+		rect->y = posmap;//floor(posmap); //force widgets to draw in pixel
 	}
 }
 
@@ -737,3 +795,25 @@ ofxUICanvas* ofxUIScrollableSliderCanvas::getScroll(){
 	// TODO try to find a better name
 	return gui_slider;
 }
+
+
+void ofxUIScrollableSliderCanvas::setVisible(bool _visible)
+{
+	
+	ofxUIScrollSlider* scrollSlider	=  (ofxUIScrollSlider *) gui_slider->getWidget("S");
+    visible = _visible;
+    if(visible)
+    {
+        enable();
+		scrollSlider->setVisible(true);
+		gui_slider->setVisible(true);
+    }
+    else
+    {
+        disable();
+		scrollSlider->setVisible(false);
+		gui_slider->setVisible(false);
+    }
+}
+
+

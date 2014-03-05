@@ -28,37 +28,52 @@
     #include "ofxXmlSettings.h"
 #endif
 
+#ifdef TARGET_OF_IOS
+    #define OFX_UI_FONT_NAME "GUI/Helvetica.ttf"
+#else
+// beguin NeuroTweeter
+
+#define OFX_UI_FONT_NAME "fonts/Arial Unicode.ttf"
+//	#define OFX_UI_FONT_NAME "sans-serif"
+#endif
+												// Originals:
+#define OFX_UI_FONT_RESOLUTION 144				// 150
+#define OFX_UI_FONT_LARGE_SIZE 14				// 10
+#define OFX_UI_FONT_MEDIUM_SIZE 8				// 8
+#define OFX_UI_FONT_SMALL_SIZE 6				// 6
+// end NeuroTweeter
+
+#define OFX_UI_LABEL_DRAW_BACK false
+
 #define OFX_UI_STATE_NORMAL 0
 #define OFX_UI_STATE_OVER 1
 #define OFX_UI_STATE_DOWN 2
 #define OFX_UI_STATE_SUSTAINED 3
 
-#define OFX_UI_GLOBAL_PADDING 2
-#define OFX_UI_GLOBAL_WIDGET_SPACING 6
-#define OFX_UI_GLOBAL_CANVAS_WIDTH 411
+#define OFX_UI_GLOBAL_PADDING 2					//2
+#define OFX_UI_GLOBAL_WIDGET_SPACING 4			//4
+#define OFX_UI_GLOBAL_CANVAS_WIDTH 411			//211
 #define OFX_UI_GLOBAL_SLIDER_HEIGHT 16
-#define OFX_UI_GLOBAL_SLIDER_WIDTH 25 //c
+#define OFX_UI_GLOBAL_SLIDER_WIDTH 25			//NeuroTwitter
 #define OFX_UI_GLOBAL_GRAPH_HEIGHT 64
 #define OFX_UI_GLOBAL_BUTTON_DIMENSION 16
 #define OFX_UI_GLOBAL_SPACING_HEIGHT 1
 
-
 #define OFX_UI_COLOR_BACK_ALPHA 100
-#define OFX_UI_COLOR_OUTLINE_ALPHA 100
-#define OFX_UI_COLOR_OUTLINE_HIGHLIGHT_ALPHA 200
+#define OFX_UI_COLOR_OUTLINE_ALPHA 0			//100
+#define OFX_UI_COLOR_OUTLINE_HIGHLIGHT_ALPHA 0	//200
 #define OFX_UI_COLOR_FILL_ALPHA 200
 #define OFX_UI_COLOR_FILL_HIGHLIGHT_ALPHA 255
 #define OFX_UI_COLOR_PADDED_ALPHA 100
 #define OFX_UI_COLOR_PADDED_OUTLINE_ALPHA 200
 
 #define OFX_UI_COLOR_BACK ofxUIColor(0, OFX_UI_COLOR_BACK_ALPHA)                                        //rect's back color
-#define OFX_UI_COLOR_OUTLINE ofxUIColor(255, 255, 255, OFX_UI_COLOR_OUTLINE_ALPHA)                      //rect's outline color
-#define OFX_UI_COLOR_OUTLINE_HIGHLIGHT ofxUIColor(255, 255, 255, OFX_UI_COLOR_OUTLINE_HIGHLIGHT_ALPHA)  //rect's onMouseOver outline highlight color
-#define OFX_UI_COLOR_FILL ofxUIColor(255, 255, 255, OFX_UI_COLOR_FILL_ALPHA)                            //rect's fill color
-#define OFX_UI_COLOR_FILL_HIGHLIGHT ofxUIColor(255, 255, 255, OFX_UI_COLOR_FILL_HIGHLIGHT_ALPHA)        //rect's onMouseDown highlight color
+#define OFX_UI_COLOR_OUTLINE ofxUIColor(0, 255, 255, OFX_UI_COLOR_OUTLINE_ALPHA)                      //rect's outline color
+#define OFX_UI_COLOR_OUTLINE_HIGHLIGHT ofxUIColor(0, 255, 255, OFX_UI_COLOR_OUTLINE_HIGHLIGHT_ALPHA)  //rect's onMouseOver outline highlight color
+#define OFX_UI_COLOR_FILL ofxUIColor(0, 255, 255, OFX_UI_COLOR_FILL_ALPHA)                            //rect's fill color
+#define OFX_UI_COLOR_FILL_HIGHLIGHT ofxUIColor(0, 255, 255, OFX_UI_COLOR_FILL_HIGHLIGHT_ALPHA)        //rect's onMouseDown highlight color
 #define OFX_UI_COLOR_PADDED ofxUIColor(0, OFX_UI_COLOR_PADDED_ALPHA)                                    //rect's padded color
 #define OFX_UI_COLOR_PADDED_OUTLINE ofxUIColor(255, OFX_UI_COLOR_PADDED_OUTLINE_ALPHA)                  //rect's padded outline color
-
 
 #define OFX_UI_DRAW_PADDING false
 #define OFX_UI_DRAW_PADDING_OUTLINE false
@@ -84,6 +99,7 @@ enum ofxUIWidgetType
 	OFX_UI_WIDGET_RADIO,
 	OFX_UI_WIDGET_FPS,
 	OFX_UI_WIDGET_2DPAD,
+	OFX_UI_WIDGET_3DPAD,		//j
 	OFX_UI_WIDGET_TEXTINPUT,
 	OFX_UI_WIDGET_WAVEFORM,
 	OFX_UI_WIDGET_SPECTRUM,
@@ -108,7 +124,6 @@ enum ofxUIWidgetType
     OFX_UI_WIDGET_IMAGESLIDER_V,
     OFX_UI_WIDGET_CUSTOMIMAGEBUTTON,
     OFX_UI_WIDGET_TEXTAREA,
-	OFX_UI_WIDGET_TEXTAREAFTGLSIMPLELAYOUT,
     OFX_UI_WIDGET_CUSTOMWIDGET,
     OFX_UI_WIDGET_BASE_DRAWS,
     OFX_UI_WIDGET_VALUEPLOTTER,
@@ -120,7 +135,8 @@ enum ofxUIWidgetType
     OFX_UI_WIDGET_DOUBLESLIDER_H,
 	OFX_UI_WIDGET_DOUBLESLIDER_V,
     OFX_UI_WIDGET_SORTABLELIST,
-    OFX_UI_WIDGET_DRAGABLELABELBUTTON, 
+    OFX_UI_WIDGET_DRAGABLELABELBUTTON,
+    OFX_UI_WIDGET_ENVELOPEEDITOR,
 	OFX_UI_WIDGET_SSLIDER_H,
 	OFX_UI_WIDGET_SSLIDER_V
 };
@@ -176,6 +192,17 @@ enum ofxUIWidgetColorType
     
 };
 
+enum ofxUITriggerType
+{
+    OFX_UI_TRIGGER_NONE     = 0x00,
+    OFX_UI_TRIGGER_BEGIN    = 0x01,
+    OFX_UI_TRIGGER_CHANGE   = 0x02,
+    OFX_UI_TRIGGER_END      = 0x04,
+    OFX_UI_TRIGGER_ALL      = 0x07
+};
+
+#define ofxUITriggerType int
+
 enum ofxUIThemeType
 {
     OFX_UI_THEME_DEFAULT = 0,
@@ -225,17 +252,12 @@ enum ofxUIThemeType
     OFX_UI_THEME_MINBLACK
 };
 
-#ifdef TARGET_OF_IOS
-    #define OFX_UI_FONT_NAME "GUI/Helvetica.ttf"
-#else
-//	#define OFX_UI_FONT_NAME "fonts/mplus-1c-regular.ttf"
-	#define OFX_UI_FONT_NAME "fonts/Arial Unicode.ttf"
-//	#define OFX_UI_FONT_NAME "sans-serif"
-#endif
-
-#define OFX_UI_FONT_RESOLUTION 144
-#define OFX_UI_FONT_LARGE_SIZE 14
-#define OFX_UI_FONT_MEDIUM_SIZE 8
-#define OFX_UI_FONT_SMALL_SIZE 6
-
-#define OFX_UI_LABEL_DRAW_BACK false
+enum ofxUI3DPadViewPoint
+{
+	OFX_UI_FRONT,
+	OFX_UI_BACK,
+	OFX_UI_TOP,
+	OFX_UI_BOTTOM,
+	OFX_UI_LEFT,
+	OFX_UI_RIGHT
+};

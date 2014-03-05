@@ -45,6 +45,7 @@ public:
     void setScrollAreaWidth(float _width);
     void setScrollableDirections(bool _scrollX, bool _scrollY);
     void setStickDistance(float _stickyDistance);
+	void setVisible(bool _visible);
     void dampenX();
     void dampenY();
     void update();
@@ -59,7 +60,8 @@ public:
     virtual void setPosition(int x, int y);
     virtual void setDimensions(float _width, float _height);
 	void drawScrollableRect();
-	//c
+	//c & j
+	void setFBOArea(float x, float y, float w, float h);
 	void setScrollingDimensions(float _width, float _height, float _widthInternal, float _heightInternal);
     void setMappedScrollPos(float _posScroll);
 	ofVec2f calcHeightContents(vector<ofxUIWidget*> _auxwidgets);
@@ -80,14 +82,14 @@ public:
     ofxUIRectangle *getSRect();
     virtual bool isHit(int x, int y);
 	
-	//c
+	//c & j
 	void guiEvent(ofxUIEventArgs &e);
 	ofxUICanvas* getScroll(); // TODO try to find a better name
 	void adjustContentstoGui(bool bsnap = false);
 
 
 protected:
-    ofxUIRectangle *sRect;	
+    ofxUIRectangle *sRect;
     bool isScrolling;
     bool snapping; 
     bool scrollX, scrollY; 
@@ -100,7 +102,10 @@ protected:
     float damping;
     float stickyDistance;    
 	
-	//c
+	//c & j
+	ofFbo fbo;    //experimental
+    ofxUIRectangle *FBORect;
+	bool bFBO;
 	float posScrollbar;//Direct scrolling
 	int heightContents;
 	
